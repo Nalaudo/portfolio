@@ -17,6 +17,7 @@ export interface Project {
   boss: { name: string; text: string; win: string }
   demo: { title: string; hint: string }
   live?: string
+  status?: string
   boss_level?: boolean
 }
 
@@ -73,48 +74,49 @@ export const projects: Project[] = [
     id: 'sbestudio',
     n: 2,
     name: 'SB Estudio',
-    kicker: 'Estudio contable · Sitio + reservas + pagos',
-    tagline: 'Del primer scroll al turno pagado y agendado, sin salir del sitio.',
+    kicker: 'Estudio contable · Sitio institucional',
+    tagline: 'Una web que transmite la solidez de un estudio con décadas de trayectoria.',
     description:
-      'Sitio institucional de un estudio contable con motion design cuidado y un flujo de reservas real: el cliente elige día y horario, paga con Mercado Pago y el turno queda creado en Google Calendar.',
-    role: 'Diseño · Desarrollo full-stack',
-    tags: ['Reservas', 'Pagos', 'Motion'],
+      'Sitio institucional de un estudio contable de Santa Fe, del concepto al despliegue: identidad visual sobria, motion design cuidado, servicios claros, modalidad de atención y un camino corto al contacto por WhatsApp.',
+    role: 'Freelance · Diseño · Desarrollo full-stack',
+    tags: ['Landing', 'Motion', 'SEO'],
     accent: '#3b76f6',
-    accent2: '#22d3ee',
+    accent2: '#14c087',
     live: 'https://sbestudio.com.ar',
+    status: 'Online',
     stats: [
-      { value: 2, label: 'integraciones externas' },
-      { value: 3, label: 'endpoints de reserva y pago' },
       { value: 5, label: 'áreas de servicio' },
-      { value: 55, label: 'commits de iteración' },
+      { value: 2, label: 'modalidades de atención' },
+      { value: 5, label: 'secciones de navegación' },
+      { value: 1, label: 'clic para consultar por WhatsApp' },
     ],
-    stack: ['nextjs', 'react', 'typescript', 'tailwind', 'framer', 'radix', 'gcal', 'mp', 'vercel', 'git'],
+    stack: ['nextjs', 'react', 'typescript', 'tailwind', 'framer', 'radix', 'rhf', 'zod', 'nodejs', 'express', 'vercel', 'git'],
     missions: [
       {
-        title: 'Turnos que no se pisan',
-        text: 'Un endpoint consulta los horarios ocupados en Google Calendar y el formulario deshabilita fines de semana, pasados y slots tomados.',
-      },
-      {
-        title: 'Cobrar la consulta',
-        text: 'Preferencia de Mercado Pago al reservar y webhook que confirma el pago y crea el evento en el calendario. Un solo flujo, sin pasos manuales.',
-      },
-      {
         title: 'Motion con criterio',
-        text: 'Headline animado palabra por palabra, mesh gradient, orbes flotantes y botones magnéticos con Framer Motion. Movimiento que guía, no que distrae.',
+        text: 'Headline animado palabra por palabra, mesh gradient, orbes flotantes, tarjetas con tilt y botones magnéticos con Framer Motion. Todo comparte una misma curva de easing para que el sitio se sienta coherente.',
       },
       {
-        title: 'Descubrible y medible',
-        text: 'Sitemap, metadata, robots, Google Analytics y Vercel Analytics/Speed Insights desde el primer día.',
+        title: 'Sistema visual',
+        text: 'Paleta azul y verde sobre fondo oscuro, logos en versión clara y oscura, tipografías Plus Jakarta Sans y Sora, cursor personalizado y una jerarquía tipográfica que se lee de un vistazo.',
+      },
+      {
+        title: 'Contenido que ordena',
+        text: 'Cinco áreas de servicio con su detalle, un selector animado de modalidad remota o presencial y una sección de nosotros con contadores animados. Cada bloque responde una duda concreta.',
+      },
+      {
+        title: 'Conversión y medición',
+        text: 'CTA de WhatsApp con mensaje pre-armado en el hero, la barra de navegación y un botón flotante. Sitemap, metadata canónica, Google Analytics y Vercel Analytics/Speed Insights desde el primer día.',
       },
     ],
     boss: {
-      name: 'La doble reserva',
-      text: 'Dos clientes eligiendo el mismo horario al mismo tiempo, con pago de por medio.',
-      win: 'Google Calendar como fuente de verdad de la disponibilidad y confirmación recién cuando el webhook aprueba el pago.',
+      name: 'La confianza a primera vista',
+      text: 'Un estudio contable tiene que verse serio, moderno y cercano al mismo tiempo, y llevar a la consulta sin fricción.',
+      win: 'Un sistema visual sobrio, animaciones sutiles con un único easing y un camino corto al contacto: WhatsApp a un clic en toda la página.',
     },
     demo: {
-      title: 'Agendá una consulta',
-      hint: 'Reservá un turno de punta a punta y mirá en vivo qué pasa detrás de escena.',
+      title: 'Laboratorio de la landing',
+      hint: 'Reproducí las animaciones, probá el botón magnético y recorré los servicios del estudio.',
     },
   },
   {
@@ -129,6 +131,7 @@ export const projects: Project[] = [
     tags: ['Motor de scoring', 'Marketplace', 'Panel broker'],
     accent: '#4ade80',
     accent2: '#22d3ee',
+    status: 'En desarrollo',
     stats: [
       { value: 4, label: 'factores de score' },
       { value: 5, label: 'productos (auto, moto, hogar…)' },
@@ -176,6 +179,7 @@ export const projects: Project[] = [
     tags: ['SaaS', 'Multiusuario', 'Dashboard'],
     accent: '#22d3ee',
     accent2: '#3b76f6',
+    status: 'En desarrollo',
     stats: [
       { value: 8, label: 'módulos de gestión' },
       { value: 5, label: 'entidades aisladas por usuario' },
@@ -219,11 +223,12 @@ export const projects: Project[] = [
     tagline: 'El jefe final: un ecosistema completo para contadores, con ARCA, pagos, IA y cifrado.',
     description:
       'Plataforma para estudios contables compuesta por tres aplicaciones: el panel del contador, un portal para sus clientes y la landing de ventas. Comparten base de datos y un modelo de acceso por suscripción, con integración real a ARCA y Mercado Pago.',
-    role: 'Arquitectura · Producto · Diseño · Desarrollo full-stack',
+    role: 'Founder · Único desarrollador · Producto y arquitectura',
     tags: ['SaaS B2B', 'ARCA', 'IA', 'E2EE'],
     accent: '#8b7bff',
     accent2: '#ff5c8a',
     live: 'https://kontari.com.ar',
+    status: 'Online · en expansión',
     boss_level: true,
     stats: [
       { value: 110, label: 'modelos de datos' },
@@ -232,9 +237,10 @@ export const projects: Project[] = [
       { value: 9, label: 'planes de suscripción' },
     ],
     stack: [
-      'nextjs', 'react', 'typescript', 'tailwind', 'heroui', 'gsap', 'vite',
-      'prisma', 'postgres', 'authjs', 'recharts', 'aisdk', 'mp', 'arca', 'whatsapp', 'resend',
-      'playwright', 'vitest', 'docker', 'vercel', 'git',
+      'nextjs', 'react', 'typescript', 'tailwind', 'heroui', 'gsap', 'vite', 'framer', 'reactquery', 'rhf', 'zod', 'recharts',
+      'prisma', 'postgres', 'authjs', '2fa', 'e2ee',
+      'aisdk', 'claude', 'mp', 'arca', 'soap', 'webhooks', 'whatsapp', 'resend',
+      'playwright', 'vitest', 'testinglib', 'axe', 'gha', 'cicd', 'docker', 'vercel', 'git',
     ],
     missions: [
       {
@@ -242,16 +248,16 @@ export const projects: Project[] = [
         text: '110 modelos con moldes de tenencia (estudio, solo, cliente) y un test estático que rompe el build si algún route handler no referencia un guard de autenticación.',
       },
       {
-        title: 'ARCA de verdad',
-        text: 'Alta de clientes por CUIT contra el padrón, ticket WSAA, facturación electrónica WSFEv1 con CAE y un motor de vencimientos con corrimiento por fin de semana.',
+        title: 'Contabilidad y ARCA de verdad',
+        text: 'Motor de liquidación de IVA y motor contable completo (diario, mayor, conciliación bancaria, estados contables). Catálogo de impuestos con sincronización diaria contra ARCA, padrón por CUIT y facturación electrónica con CAE.',
       },
       {
-        title: 'Cobrar y proteger',
-        text: 'Suscripciones recurrentes con Mercado Pago (3 tiers × 3 ciclos), estados de prueba, gracia y bloqueo, bóveda E2EE con AES-256-GCM + PBKDF2, 2FA y auditoría.',
+        title: 'Cobrar, crecer y proteger',
+        text: 'Suscripciones recurrentes con Mercado Pago (3 tiers × 3 ciclos), programa de referidos entre contadores, bóveda E2EE con AES-256-GCM + PBKDF2, 2FA y auditoría.',
       },
       {
         title: 'IA con tope de gasto',
-        text: 'Asistente conversacional con herramientas de lectura sobre Vercel AI Gateway. Es opt-in por estudio y respeta un presupuesto máximo.',
+        text: 'IA generativa con AI SDK: un asistente conversacional con herramientas de lectura, opt-in por estudio y con un presupuesto máximo.',
       },
     ],
     boss: {

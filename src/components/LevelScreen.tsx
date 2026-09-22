@@ -122,6 +122,11 @@ export function LevelScreen({ id }: { id: LevelId }) {
             <p className="mt-6 max-w-2xl font-display text-[clamp(1.1rem,2.1vw,1.55rem)] font-semibold leading-snug text-white">{p.tagline}</p>
             <p className="mt-5 max-w-2xl text-[15.5px] leading-relaxed text-white/60">{p.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
+              {p.status && (
+                <span className="chip !border-mint/40 !text-mint">
+                  <span className="h-1.5 w-1.5 rounded-full bg-mint" /> {p.status}
+                </span>
+              )}
               <span className="chip !border-accent/40 !text-accent">{p.role}</span>
               {p.tags.map((t) => (
                 <span key={t} className="chip">{t}</span>

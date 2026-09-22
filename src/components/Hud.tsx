@@ -6,10 +6,12 @@ import { fx } from '../lib/fx'
 import { scrollToId, closeLevel, readLevel } from '../lib/route'
 import { TOTAL_STARS } from '../data/achievements'
 import { profile } from '../data/profile'
+import { Logo } from './ui/Logo'
 
 const NAV = [
   { id: 'mapa', label: 'Mapa' },
   { id: 'inventario', label: 'Inventario' },
+  { id: 'trayectoria', label: 'Trayectoria' },
   { id: 'perfil', label: 'Perfil' },
   { id: 'contacto', label: 'Contacto' },
 ]
@@ -64,7 +66,7 @@ export function Hud() {
     <header className="fixed inset-x-0 top-0 z-[70] border-b border-white/[0.06] bg-[#05060b]/70 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <button onClick={() => go('inicio')} className="group flex items-center gap-2.5" aria-label="Volver al inicio">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent font-mono text-[13px] font-extrabold text-void transition group-hover:rotate-6 group-hover:scale-110">NB</span>
+          <Logo size={32} className="rounded-lg transition group-hover:rotate-6 group-hover:scale-110" />
           <span className="hidden font-display text-[13px] font-bold tracking-tight sm:block">{profile.first}</span>
         </button>
 

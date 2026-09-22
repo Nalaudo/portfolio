@@ -75,7 +75,8 @@ export function Hero() {
   return (
     <section id="inicio" className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6">
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40 [mask-image:radial-gradient(70%_60%_at_50%_45%,#000,transparent)]" />
-      <Relic id="hero" className="bottom-24 right-[7%] hidden sm:grid" />
+      {/* En mobile el contenido se apila, así que esta estrella se ancla a una fila corta (el renglón "&gt; rol") en vez de al fondo de la sección. */}
+      <Relic id="hero" className="right-[8%] top-[300px] sm:top-auto sm:bottom-24 sm:right-[7%]" />
 
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
         <div>
@@ -166,10 +167,10 @@ export function Hero() {
 
       <motion.div {...item(7)} className="relative mx-auto mt-14 grid w-full max-w-7xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-4">
         {[
+          { to: 3, s: '+', l: 'años construyendo software end-to-end' },
           { to: 5, s: '', l: 'mundos para explorar' },
-          { to: 600, s: '+', l: 'tests automatizados' },
+          { to: 600, s: '+', l: 'tests automatizados en Kontari' },
           { to: 110, s: '', l: 'modelos de datos en un solo SaaS' },
-          { to: 4, s: '', l: 'integraciones reales (ARCA, MP…)' },
         ].map((x) => (
           <div key={x.l} className="bg-[#080a12]/90 px-5 py-5">
             <p className="font-display text-3xl font-black text-white">

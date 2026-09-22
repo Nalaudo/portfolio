@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { game } from '../../game/store'
 import { sfx } from '../../game/audio'
 import { fx } from '../../lib/fx'
@@ -209,7 +210,50 @@ export function MehringDemo() {
   const combos = useRef(new Set<string>(['roble|listones|paja']))
   const maxEx = useRef(0)
   const played = useRef(false)
+  const strip = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ x: number; left: number; id: number } | null>(null)
+  const [dragging, setDragging] = useState(false)
   const fin = FINISHES.find((f) => f.k === finish)!
+
+  // Sin shift: la rueda del mouse (vertical) también desliza el carril del catálogo.
+  useEffect(() => {
+    const el = strip.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return
+      if (el.scrollWidth <= el.clientWidth) return
+      el.scrollLeft += e.deltaY
+      e.preventDefault()
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  // Alternativa al wheel: arrastrar con el mouse (útil en desktop sin trackpad).
+  const stripDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = strip.current
+    if (!el || e.button !== 0) return
+    drag.current = { x: e.clientX, left: el.scrollLeft, id: e.pointerId }
+    el.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }
+  const stripMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = strip.current
+    const d = drag.current
+    if (!el || !d || d.id !== e.pointerId) return
+    el.scrollLeft = d.left - (e.clientX - d.x)
+  }
+  const stripEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (drag.current?.id !== e.pointerId) return
+    drag.current = null
+    setDragging(false)
+  }
+  const nudge = (dir: 1 | -1) => {
+    const el = strip.current
+    if (!el) return
+    sfx.pop()
+    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
+  }
 
   const check = (f: Finish, b: Back, s: Seat, e: number) => {
     if (!played.current) {
@@ -295,14 +339,43 @@ export function MehringDemo() {
       </div>
 
       <div className="mt-10">
-        <p className="label mb-4">Del catálogo real · fotografía de producto</p>
-        <div className="no-scrollbar -mx-3 flex snap-x gap-3 overflow-x-auto px-3 pb-2 sm:-mx-6 sm:px-6">
-          {CATALOG.map((c) => (
-            <figure key={c.f} className="group relative h-64 w-48 shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-[#efe8d6]">
-              <img src={`/img/mehring/${c.f}.webp`} alt={c.n} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
-              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 font-display text-sm font-bold">{c.n}</figcaption>
-            </figure>
-          ))}
+        <div className="mb-4 flex items-center justify-between">
+          <p className="label">Del catálogo real · fotografía de producto</p>
+          <p className="hidden font-mono text-[10.5px] text-white/35 sm:block">arrastrá, girá la rueda o usá las flechas</p>
+        </div>
+        <div className="relative">
+          <div
+            ref={strip}
+            onPointerDown={stripDown}
+            onPointerMove={stripMove}
+            onPointerUp={stripEnd}
+            onPointerCancel={stripEnd}
+            onPointerLeave={stripEnd}
+            className={`no-scrollbar -mx-3 flex select-none gap-3 overflow-x-auto px-3 pb-2 sm:-mx-6 sm:px-6 ${dragging ? 'cursor-grabbing snap-none' : 'cursor-grab snap-x'}`}
+          >
+            {CATALOG.map((c) => (
+              <figure key={c.f} className="group relative h-64 w-48 shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-[#efe8d6]">
+                <img src={`/img/mehring/${c.f}.webp`} alt={c.n} loading="lazy" draggable={false} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 font-display text-sm font-bold">{c.n}</figcaption>
+              </figure>
+            ))}
+          </div>
+
+          {/* flechas: alternativa explícita al wheel/drag para mouse de escritorio */}
+          <button
+            onClick={() => nudge(-1)}
+            aria-label="Ver sillas anteriores"
+            className="absolute left-0 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-[#0b0e18]/90 p-2.5 text-white/80 shadow-lg backdrop-blur transition hover:border-accent hover:text-accent sm:grid"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={() => nudge(1)}
+            aria-label="Ver más sillas"
+            className="absolute right-0 top-1/2 hidden translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-[#0b0e18]/90 p-2.5 text-white/80 shadow-lg backdrop-blur transition hover:border-accent hover:text-accent sm:grid"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
       </div>
     </div>

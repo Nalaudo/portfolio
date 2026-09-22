@@ -10,6 +10,7 @@ import { Hero } from './components/Hero'
 import { Ribbon } from './components/Ribbon'
 import { Overworld } from './components/Overworld'
 import { Inventory } from './components/Inventory'
+import { Timeline } from './components/Timeline'
 import { Profile } from './components/Profile'
 import { Contact } from './components/Contact'
 import { LevelScreen } from './components/LevelScreen'
@@ -58,6 +59,7 @@ export default function App() {
         <Ribbon />
         <Overworld />
         <Inventory />
+        <Timeline />
         <Profile />
         <Contact />
       </main>

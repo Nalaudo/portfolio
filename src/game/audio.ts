@@ -6,8 +6,21 @@ export function setSoundEnabled(v: boolean) {
   enabled = v
 }
 
+// Una pestaña de fondo no se silencia sola (el audio del navegador sigue sonando
+// aunque no la estés mirando), así que lo hacemos nosotros: nada de sfx mientras
+// document.hidden sea true, y se suspende/reanuda el contexto con la pestaña.
+let hidden = typeof document !== 'undefined' && document.hidden
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    hidden = document.hidden
+    if (!ctx) return
+    if (hidden) void ctx.suspend()
+    else if (enabled) void ctx.resume()
+  })
+}
+
 function ac(): AudioContext | null {
-  if (!enabled) return null
+  if (!enabled || hidden) return null
   try {
     if (!ctx) {
       const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
@@ -79,6 +92,10 @@ export const sfx = {
     ;[523, 659, 784, 1046].forEach((f, i) => tone(f, 0.16, { type: 'triangle', vol: 0.06, delay: i * 0.07 }))
   },
   error: () => tone(160, 0.28, { type: 'sawtooth', vol: 0.05, slide: -60 }),
+  // Distinto del "error" genérico: un descenso de 3 notas tipo "womp womp womp" de fichín.
+  gameOver: () => {
+    ;[220, 175, 130].forEach((f, i) => tone(f, 0.45, { type: 'sawtooth', vol: 0.05, slide: -40, delay: i * 0.16 }))
+  },
   achievement: () => {
     ;[659, 880, 1174, 1568].forEach((f, i) => tone(f, 0.2, { type: 'triangle', vol: 0.05, delay: i * 0.09 }))
   },

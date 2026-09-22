@@ -49,10 +49,11 @@ export function rankFor(xp: number) {
 
 const KEY = 'nb-portfolio-v1'
 const SESSION_KEY = 'nb-started'
+const SOUND_KEY = 'nb-sound'
 
 const initial: GameState = {
   started: false,
-  sound: false,
+  sound: true,
   turbo: false,
   persona: null,
   xp: 0,
@@ -72,6 +73,13 @@ function load(): GameState {
   } catch {
     /* localStorage no disponible */
   }
+  // El sonido arranca activado; solo se respeta la preferencia si la persona lo cambió a mano.
+  try {
+    const pref = localStorage.getItem(SOUND_KEY)
+    s.sound = pref === null ? true : pref === '1'
+  } catch {
+    s.sound = true
+  }
   try {
     if (sessionStorage.getItem(SESSION_KEY) === '1' || location.hash.startsWith('#/nivel/')) s.started = true
   } catch {
@@ -86,9 +94,10 @@ const listeners = new Set<() => void>()
 
 function persist() {
   try {
-    const { started: _s, turbo: _t, ...rest } = state
+    const { started: _s, turbo: _t, sound: _o, ...rest } = state
     void _s
     void _t
+    void _o
     localStorage.setItem(KEY, JSON.stringify(rest))
   } catch {
     /* noop */
@@ -159,12 +168,13 @@ export const game = {
   toggleSound() {
     const sound = !state.sound
     setSoundEnabled(sound)
+    try {
+      localStorage.setItem(SOUND_KEY, sound ? '1' : '0')
+    } catch {
+      /* noop */
+    }
     set({ sound })
     if (sound) sfx.click()
-  },
-  setSound(sound: boolean) {
-    setSoundEnabled(sound)
-    set({ sound })
   },
   setPersona(persona: Persona) {
     set({ persona })

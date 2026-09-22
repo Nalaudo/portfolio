@@ -9,6 +9,7 @@ export function CursorFx() {
 
   useEffect(() => {
     if (window.matchMedia('(pointer: coarse)').matches) return
+    document.documentElement.classList.add('custom-cursor')
     let tx = innerWidth / 2
     let ty = innerHeight / 2
     let rx = tx
@@ -34,6 +35,7 @@ export function CursorFx() {
     addEventListener('pointermove', move, { passive: true })
     raf = requestAnimationFrame(loop)
     return () => {
+      document.documentElement.classList.remove('custom-cursor')
       removeEventListener('pointermove', move)
       cancelAnimationFrame(raf)
     }

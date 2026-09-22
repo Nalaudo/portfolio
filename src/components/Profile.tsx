@@ -1,13 +1,15 @@
-import { Layers, Lock, Plug, ShieldCheck, Sparkles, Trophy } from 'lucide-react'
+import { Blocks, Layers, Lock, Plug, ShieldCheck, Sparkles, Trophy, Users } from 'lucide-react'
 import { achievements } from '../data/achievements'
 import { achievementIcon } from '../lib/icons'
 import { game, useGame } from '../game/store'
 import { Relic, SectionTitle } from './ui/bits'
 
 const PRINCIPLES = [
-  { icon: Layers, title: 'De la base de datos al píxel', text: 'Modelo el dominio, diseño la interfaz y la conecto. Kontari tiene 110 modelos de datos; Mehring cuida cada kilobyte de su hero.' },
-  { icon: ShieldCheck, title: 'Tests como seguro de vida', text: 'Más de 600 tests en Kontari, incluidos guards estáticos que rompen el build si una ruta queda sin autenticación.' },
-  { icon: Plug, title: 'Integraciones que funcionan', text: 'ARCA, Mercado Pago, Google Calendar, WhatsApp e IA. Turnos, cobros y facturas que existen de verdad, no maquetas.' },
+  { icon: Layers, title: 'De la base de datos al píxel', text: 'Como único desarrollador de Kontari llevo el ciclo completo: modelo el dominio (110 modelos), diseño la interfaz, la conecto y la despliego.' },
+  { icon: ShieldCheck, title: 'Tests como seguro de vida', text: 'Más de 600 tests en Kontari (Vitest, Playwright y axe-core en CI), incluidos guards estáticos que rompen el build si una ruta queda sin autenticación.' },
+  { icon: Plug, title: 'Integraciones que funcionan', text: 'ARCA, Mercado Pago, Stripe, Adyen, WhatsApp e IA generativa. Cobros, webhooks y facturas que existen de verdad, no maquetas.' },
+  { icon: Blocks, title: 'Arquitectura que aguanta', text: 'Clean Architecture con NestJS en Crombie, diseño modular y POO en ShineForth. Capas claras para que el código crezca sin dolor.' },
+  { icon: Users, title: 'Lidero y mentoreo', text: 'Lideré proyectos full stack y mentoreé a un desarrollador junior en buenas prácticas, Git y APIs. Comunico bien con clientes y stakeholders.' },
   { icon: Sparkles, title: 'Detalle que se siente', text: 'Motion con criterio, accesibilidad probada con axe en los E2E y microinteracciones que hacen que un producto se sienta vivo. Como este portfolio.' },
 ]
 
@@ -19,13 +21,13 @@ export function Profile() {
     <section id="perfil" className="relative px-4 py-24 sm:px-6 md:py-32">
       <Relic id="profile" className="left-[5%] top-28" />
       <div className="mx-auto max-w-7xl">
-        <SectionTitle eyebrow="03 · Perfil" title={<>Cómo <span className="text-gradient">juego</span>.</>}>
-          Cuatro reglas que se repiten en cada proyecto, y la sala de trofeos con lo que fuiste desbloqueando por acá.
+        <SectionTitle eyebrow="04 · Perfil" title={<>Cómo <span className="text-gradient">juego</span>.</>}>
+          Seis reglas que se repiten en cada proyecto, y la sala de trofeos con lo que fuiste desbloqueando por acá.
         </SectionTitle>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {PRINCIPLES.map((p, i) => (
-            <article key={p.title} className="panel panel-hover flex gap-5 p-6">
+            <article key={p.title} className="panel panel-hover flex flex-col gap-4 p-6 sm:flex-row sm:gap-5">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent/12 text-accent ring-1 ring-accent/25">
                 <p.icon size={22} />
               </span>

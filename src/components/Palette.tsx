@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { CornerDownLeft, Gamepad2, Mail, Map as MapIcon, Rocket, RotateCcw, Search, User, Backpack, Volume2, Zap, type LucideIcon } from 'lucide-react'
+import { CornerDownLeft, Gamepad2, Mail, Map as MapIcon, Rocket, RotateCcw, Search, User, Backpack, Briefcase, Volume2, Zap, type LucideIcon } from 'lucide-react'
 import { projects } from '../data/projects'
 import { profile } from '../data/profile'
 import { GithubMark, levelIcon } from '../lib/icons'
@@ -37,6 +37,7 @@ export function Palette() {
       { id: 'home', label: 'Ir al inicio', hint: 'sección', icon: Rocket, run: nav('inicio') },
       { id: 'map', label: 'Ir al mapa de mundos', hint: 'sección', icon: MapIcon, run: nav('mapa') },
       { id: 'inv', label: 'Ver el inventario (stack)', hint: 'sección', icon: Backpack, run: nav('inventario') },
+      { id: 'trayectoria', label: 'Ver la trayectoria (Kontari, Crombie, ShineForth…)', hint: 'sección', icon: Briefcase, run: nav('trayectoria') },
       { id: 'profile', label: 'Ver el perfil y logros', hint: 'sección', icon: User, run: nav('perfil') },
       { id: 'contact', label: 'Ir a contacto', hint: 'sección', icon: Mail, run: nav('contacto') },
       ...projects.map<Cmd>((p) => ({
@@ -49,6 +50,7 @@ export function Palette() {
       { id: 'sound', label: 'Activar / silenciar sonido', hint: 'ajuste', icon: Volume2, run: () => game.toggleSound() },
       { id: 'turbo', label: 'Modo turbo', hint: 'easter egg', icon: Zap, run: () => { game.toggleTurbo(); game.unlock('konami'); fx.confetti() } },
       { id: 'gh', label: 'Abrir GitHub', hint: 'externo', icon: GithubIcon, run: () => window.open(profile.github, '_blank', 'noopener') },
+      { id: 'in', label: 'Abrir LinkedIn', hint: 'externo', icon: Briefcase, run: () => window.open(profile.linkedin, '_blank', 'noopener') },
       { id: 'mail', label: 'Escribirme un email', hint: 'externo', icon: Mail, run: () => (location.href = `mailto:${profile.email}`) },
       { id: 'reset', label: 'Reiniciar partida', hint: 'borra tu progreso', icon: RotateCcw, run: () => game.reset() },
     ],

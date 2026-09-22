@@ -17,15 +17,16 @@ npm run preview
 
 Vite 8 · React 19 · TypeScript · Tailwind CSS v4 · `motion` · lucide-react · fuentes self-hosted
 (Unbounded, Inter, JetBrains Mono). Sin backend: el progreso vive en `localStorage`.
-SFX sintetizados con WebAudio (sin assets) y apagados por defecto.
+SFX sintetizados con WebAudio (sin assets), activados por defecto; el botón de sonido del HUD (o de la pantalla de inicio) los silencia y esa preferencia se recuerda. También se silencian solos en pestañas sin foco (Page Visibility API) — no siguen sonando en segundo plano.
 
 ## Qué editar
 
 | Qué | Dónde |
 |---|---|
-| Nombre, rol, email, GitHub | `src/data/profile.ts` |
+| Nombre, rol, email, GitHub, LinkedIn, idiomas, formación | `src/data/profile.ts` (según el CV y LinkedIn) |
 | Proyectos, stats, misiones, colores | `src/data/projects.ts` |
-| Inventario de tecnologías | `src/data/skills.ts` (la rareza se calcula sola según en cuántos proyectos aparece) |
+| Inventario de tecnologías | `src/data/skills.ts` (la rareza se calcula sola según en cuántos mundos y trabajos aparece) |
+| Trayectoria (Kontari, Crombie, ShineForth, freelance…) | `src/data/experience.ts` |
 | Logros y XP | `src/data/achievements.ts` |
 | Rangos y umbrales de XP | `RANKS` en `src/game/store.ts` |
 
@@ -47,10 +48,16 @@ Para sumar un proyecto: agregalo a `projects`, un ícono en `src/lib/icons.tsx`,
   PBKDF2-SHA256 600k + AES-256-GCM reales vía WebCrypto (requiere HTTPS o localhost).
 - **Polizari**: *Renewal Rush*, un arcade de 30 s.
 - **Cotizari**: cotizador con el score real 42/38/12/8 y agente de contacto simulado.
-- **SB Estudio**: flujo de reserva → pago → evento de calendario con consola de API en vivo.
+- **SB Estudio**: laboratorio de la landing: animación del titular palabra por palabra (con sliders), botón magnético y explorador de servicios y modalidad.
 - **Mehring**: configurador de silla en SVG con vista explosionada.
 
 Las aseguradoras, clientes, precios y horarios de las demos son ficticios.
+
+## Logo personal
+
+`src/components/ui/Logo.tsx` es el monograma "NB" en grilla de píxeles (conecta con el "NB-OS"
+del boot). Vive también como archivos sueltos en `public/brand/` (SVG + PNG, con fondo,
+transparente y en un solo color) para usar fuera del sitio — ver `public/brand/README.md`.
 
 ## Deploy
 

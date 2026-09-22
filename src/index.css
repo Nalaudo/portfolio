@@ -357,3 +357,9 @@ html[data-turbo='1'] {
 @media (pointer: coarse) {
   .cursor-ring, .cursor-dot, .cursor-glow { display: none; }
 }
+
+/* Con el cursor a medida activo, se oculta la flecha nativa del sistema. */
+.custom-cursor,
+.custom-cursor * {
+  cursor: none !important;
+}
