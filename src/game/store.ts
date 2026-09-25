@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { achievementById, achievements } from '../data/achievements'
 import { fx } from '../lib/fx'
+import { getT, type Loc } from '../lib/i18n'
 import { setSoundEnabled, sfx } from './audio'
 
 export type Persona = 'recruiter' | 'client' | 'dev'
@@ -27,13 +28,13 @@ export interface Toast {
   xp?: number
 }
 
-export const RANKS = [
-  { min: 0, name: 'Novato' },
-  { min: 100, name: 'Aprendiz' },
-  { min: 300, name: 'Dev' },
-  { min: 600, name: 'Senior' },
-  { min: 1000, name: 'Arquitecto' },
-  { min: 1500, name: 'Leyenda' },
+export const RANKS: { min: number; name: Loc }[] = [
+  { min: 0, name: { es: 'Novato', en: 'Rookie', it: 'Novellino' } },
+  { min: 100, name: { es: 'Aprendiz', en: 'Apprentice', it: 'Apprendista' } },
+  { min: 300, name: { es: 'Dev', en: 'Dev', it: 'Dev' } },
+  { min: 600, name: { es: 'Senior', en: 'Senior', it: 'Senior' } },
+  { min: 1000, name: { es: 'Arquitecto', en: 'Architect', it: 'Architetto' } },
+  { min: 1500, name: { es: 'Leyenda', en: 'Legend', it: 'Leggenda' } },
 ]
 
 export function rankFor(xp: number) {
@@ -192,7 +193,8 @@ export const game = {
     if (after.index > before.index) {
       sfx.levelUp()
       fx.confetti()
-      toastStore.push({ kind: 'rank', title: `Rango: ${after.name}`, text: '¡Subiste de nivel!' })
+      const t = getT()
+      toastStore.push({ kind: 'rank', title: `${t('Rango', 'Rank', 'Grado')}: ${t.l(after.name)}`, text: t('¡Subiste de nivel!', 'You leveled up!', 'Sei salito di livello!') })
     }
     evaluate()
   },
@@ -211,7 +213,8 @@ export const game = {
     set({ done: [...state.done, id] })
     sfx.success()
     fx.confetti()
-    toastStore.push({ kind: 'info', title: '¡Nivel superado!', text: 'Completaste el desafío del mundo. +100 XP' })
+    const t = getT()
+    toastStore.push({ kind: 'info', title: t('¡Nivel superado!', 'Level cleared!', 'Livello superato!'), text: t('Completaste el desafío del mundo. +100 XP', 'You beat this world’s challenge. +100 XP', 'Hai superato la sfida di questo mondo. +100 XP') })
     game.addXp(100)
   },
   collect(id: string) {
@@ -227,7 +230,8 @@ export const game = {
     set({ unlocked: [...state.unlocked, id] })
     if (id !== 'start') {
       sfx.achievement()
-      toastStore.push({ kind: 'achievement', title: a.title, text: a.desc, xp: a.xp })
+      const t = getT()
+      toastStore.push({ kind: 'achievement', title: t.l(a.title), text: t.l(a.desc), xp: a.xp })
     }
     game.addXp(a.xp)
   },

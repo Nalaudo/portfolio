@@ -10,6 +10,7 @@ import { TOTAL_LEVELS } from '../data/achievements'
 import { Mascot } from './ui/Mascot'
 import { Kbd, Relic, SectionTitle, Stars } from './ui/bits'
 import { useMedia } from '../hooks/useMedia'
+import { useT } from '../lib/i18n'
 
 // Coordenadas del mapa. Índice 0 = START, 1..5 = niveles, 6 = sala final (contacto).
 const LAYOUTS = {
@@ -57,6 +58,7 @@ const DUST = Array.from({ length: 22 }, (_, i) => ({
 export function Overworld() {
   const tall = useMedia('(max-width: 767px)')
   const key: LayoutKey = tall ? 'tall' : 'wide'
+  const t = useT()
   const L = LAYOUTS[key]
   const d = useMemo(() => buildPath(L.pts), [L])
 
@@ -224,8 +226,15 @@ export function Overworld() {
   return (
     <section id="mapa" className="relative px-4 py-24 sm:px-6 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle eyebrow="01 · Mapa de mundos" title={<>Cada proyecto es <span className="text-gradient">un nivel</span>. Elegí el tuyo.</>}>
-          Caminá con Bit por el mapa y entrá a un mundo. Cada uno trae una demo jugable de lo que hace el proyecto real, más las decisiones técnicas detrás.
+        <SectionTitle
+          eyebrow={t('01 · Mapa de mundos', '01 · World map', '01 · Mappa dei mondi')}
+          title={t(<>Cada proyecto es <span className="text-gradient">un nivel</span>. Elegí el tuyo.</>, <>Every project is <span className="text-gradient">a level</span>. Pick yours.</>, <>Ogni progetto è <span className="text-gradient">un livello</span>. Scegli il tuo.</>)}
+        >
+          {t(
+            'Caminá con Bit por el mapa y entrá a un mundo. Cada uno trae una demo jugable de lo que hace el proyecto real, más las decisiones técnicas detrás.',
+            'Walk the map with Bit and enter a world. Each one has a playable demo of what the real project does, plus the technical decisions behind it.',
+            'Cammina con Bit sulla mappa ed entra in un mondo. Ognuno ha una demo giocabile di ciò che fa il progetto reale, più le decisioni tecniche dietro.',
+          )}
         </SectionTitle>
 
         <div
@@ -264,7 +273,7 @@ export function Overworld() {
 
           {/* START */}
           <div className="absolute -translate-x-1/2 -translate-y-1/2" style={pct(0)} data-node="0">
-            <button onClick={() => onNode(0)} className="grid h-14 w-14 place-items-center rounded-full border border-white/20 bg-white/5 text-white/70 transition hover:border-accent hover:text-accent" aria-label="Punto de inicio">
+            <button onClick={() => onNode(0)} className="grid h-14 w-14 place-items-center rounded-full border border-white/20 bg-white/5 text-white/70 transition hover:border-accent hover:text-accent" aria-label={t('Punto de inicio', 'Starting point', 'Punto di partenza')}>
               <Flag size={20} />
             </button>
             <p className="label absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap">Start</p>
@@ -283,7 +292,7 @@ export function Overworld() {
                   onClick={() => onNode(i)}
                   onMouseEnter={sfx.hover}
                   className="group relative flex flex-col items-center outline-offset-8"
-                  aria-label={`Nivel ${p.n}: ${p.name}. ${p.tagline}`}
+                  aria-label={`${t('Nivel', 'Level', 'Livello')} ${p.n}: ${p.name}. ${t.l(p.tagline)}`}
                 >
                   {isCur && !walking && <span className="absolute left-1/2 top-[38px] h-[76px] w-[76px] -translate-x-1/2 -translate-y-1/2 animate-[pulse-ring_2.2s_ease-out_infinite] rounded-full border-2 border-accent sm:top-[44px] sm:h-[88px] sm:w-[88px]" />}
                   <span className="relative grid h-[76px] w-[76px] place-items-center transition-transform duration-300 group-hover:scale-110 sm:h-[88px] sm:w-[88px]">
@@ -297,19 +306,19 @@ export function Overworld() {
                     )}
                     {p.boss_level && (
                       <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-rose px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-void">
-                        <Crown size={10} /> Jefe
+                        <Crown size={10} /> {t('Jefe', 'Boss', 'Boss')}
                       </span>
                     )}
                   </span>
                   <span className="mt-2 flex flex-col items-center gap-1 rounded-xl bg-[#080a12]/80 px-3 py-1.5 backdrop-blur-sm">
-                    <span className="font-mono text-[9.5px] tracking-[0.2em] text-accent">NIVEL {String(p.n).padStart(2, '0')}</span>
+                    <span className="font-mono text-[9.5px] tracking-[0.2em] text-accent">{t('NIVEL', 'LEVEL', 'LIVELLO')} {String(p.n).padStart(2, '0')}</span>
                     <span className="font-display text-[12px] font-extrabold uppercase tracking-tight sm:text-[13px]">{p.name}</span>
                     <Stars n={st} size={11} />
                   </span>
                   <span className={`pointer-events-none absolute left-1/2 z-30 hidden w-56 -translate-x-1/2 rounded-xl border border-white/10 bg-[#0b0e18]/95 p-3 text-left opacity-0 shadow-2xl backdrop-blur transition duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 md:block ${tipBelow ? 'top-full mt-24 translate-y-1 group-hover:translate-y-0' : 'bottom-full mb-6 -translate-y-1 group-hover:translate-y-0'}`}>
-                    <span className="block text-[12.5px] leading-snug text-white/80">{p.tagline}</span>
+                    <span className="block text-[12.5px] leading-snug text-white/80">{t.l(p.tagline)}</span>
                     <span className="mt-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-accent">
-                      Entrar <CornerDownLeft size={11} />
+                      {t('Entrar', 'Enter', 'Entra')} <CornerDownLeft size={11} />
                     </span>
                   </span>
                 </button>
@@ -319,11 +328,11 @@ export function Overworld() {
 
           {/* sala final */}
           <div className="absolute -translate-x-1/2 -translate-y-1/2" style={pct(6)} data-node="6">
-            <button onClick={() => onNode(6)} onMouseEnter={sfx.hover} className="group flex flex-col items-center" aria-label="Sala final: contacto">
+            <button onClick={() => onNode(6)} onMouseEnter={sfx.hover} className="group flex flex-col items-center" aria-label={t('Sala final: contacto', 'Final room: contact', 'Sala finale: contatti')}>
               <span className="grid h-16 w-16 place-items-center rounded-full border border-dashed border-white/30 bg-white/5 text-white/70 transition group-hover:scale-110 group-hover:border-accent group-hover:text-accent">
                 <Rocket size={24} />
               </span>
-              <span className="mt-2 rounded-lg bg-[#080a12]/80 px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.2em] text-white/60">Sala final</span>
+              <span className="mt-2 rounded-lg bg-[#080a12]/80 px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.2em] text-white/60">{t('Sala final', 'Final room', 'Sala finale')}</span>
             </button>
           </div>
 
@@ -335,13 +344,13 @@ export function Overworld() {
 
         <div className="mt-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <p className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] text-white/45">
-            <span className="hidden items-center gap-1.5 md:flex"><Kbd>←</Kbd><Kbd>→</Kbd> caminar</span>
-            <span className="hidden items-center gap-1.5 md:flex"><Kbd>Enter</Kbd> entrar</span>
-            <span>o tocá cualquier mundo</span>
+            <span className="hidden items-center gap-1.5 md:flex"><Kbd>←</Kbd><Kbd>→</Kbd> {t('caminar', 'walk', 'cammina')}</span>
+            <span className="hidden items-center gap-1.5 md:flex"><Kbd>Enter</Kbd> {t('entrar', 'enter', 'entra')}</span>
+            <span>{t('o tocá cualquier mundo', 'or tap any world', 'o tocca un mondo qualsiasi')}</span>
           </p>
           <div className="flex items-center gap-4 font-mono text-[11px] text-white/60">
-            <span>Mundos <b className="text-accent">{visited.length}/{TOTAL_LEVELS}</b></span>
-            <span>Estrellas <b className="text-accent">{totalStars}/{TOTAL_LEVELS * 3}</b></span>
+            <span>{t('Mundos', 'Worlds', 'Mondi')} <b className="text-accent">{visited.length}/{TOTAL_LEVELS}</b></span>
+            <span>{t('Estrellas', 'Stars', 'Stelle')} <b className="text-accent">{totalStars}/{TOTAL_LEVELS * 3}</b></span>
           </div>
         </div>
       </div>

@@ -7,19 +7,39 @@ import { Mascot } from './ui/Mascot'
 import { Kbd, ScrambleText } from './ui/bits'
 import { profile } from '../data/profile'
 import { warp } from './Starfield'
+import { useT } from '../lib/i18n'
+import { LangSwitch } from './ui/LangSwitch'
 
-const LOG = [
-  'NB-OS v1.0 · arrancando sistema',
-  'detectando dispositivo ........ ok',
-  'cargando tipografías ........... ok',
-  'montando 5 mundos .............. ok',
-  'compilando demos jugables ....... ok',
-]
+const LOG = {
+  es: [
+    'NB-OS v1.0 · arrancando sistema',
+    'detectando dispositivo ........ ok',
+    'cargando tipografías ........... ok',
+    'montando 5 mundos .............. ok',
+    'compilando demos jugables ....... ok',
+  ],
+  en: [
+    'NB-OS v1.0 · booting system',
+    'detecting device .............. ok',
+    'loading typefaces .............. ok',
+    'mounting 5 worlds .............. ok',
+    'compiling playable demos ........ ok',
+  ],
+  it: [
+    'NB-OS v1.0 · avvio del sistema',
+    'rilevamento dispositivo ....... ok',
+    'caricamento font ............... ok',
+    'montaggio di 5 mondi ........... ok',
+    'compilazione demo giocabili ..... ok',
+  ],
+}
 
 export function Boot() {
   const started = useGame((s) => s.started)
   const sound = useGame((s) => s.sound)
   const hasSave = useGame((s) => s.xp > 0)
+  const t = useT()
+  const log = t.l(LOG)
   const [phase, setPhase] = useState<'load' | 'ready' | 'leave' | 'gone'>(started ? 'gone' : 'load')
   const [progress, setProgress] = useState(0)
 
@@ -63,7 +83,7 @@ export function Boot() {
     return () => removeEventListener('keydown', onKey)
   }, [phase, go])
 
-  const shown = Math.floor((progress / 100) * LOG.length + 0.999)
+  const shown = Math.floor((progress / 100) * log.length + 0.999)
 
   return (
     <AnimatePresence>
@@ -86,15 +106,15 @@ export function Boot() {
             <Mascot size={phase === 'ready' ? 104 : 76} walking={phase === 'load'} className="mb-6 transition-all duration-500" />
 
             <div className="mb-8 w-full text-left font-mono text-[12px] leading-relaxed text-accent/80">
-              {LOG.slice(0, shown).map((l, i) => (
-                <div key={l} className={i === shown - 1 && phase === 'load' ? 'text-white/90' : 'text-white/45'}>
+              {log.slice(0, shown).map((l, i) => (
+                <div key={i} className={i === shown - 1 && phase === 'load' ? 'text-white/90' : 'text-white/45'}>
                   <span className="text-accent">&gt; </span>
                   {l}
                 </div>
               ))}
               {hasSave && phase !== 'load' && (
                 <div className="text-white/45">
-                  <span className="text-accent">&gt; </span>partida guardada encontrada
+                  <span className="text-accent">&gt; </span>{t('partida guardada encontrada', 'saved game found', 'partita salvata trovata')}
                 </div>
               )}
             </div>
@@ -115,7 +135,7 @@ export function Boot() {
             <AnimatePresence>
               {phase === 'ready' && (
                 <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center">
-                  <p className="label mb-3">Portfolio jugable · 5 mundos</p>
+                  <p className="label mb-3">{t('Portfolio jugable · 5 mundos', 'Playable portfolio · 5 worlds', 'Portfolio giocabile · 5 mondi')}</p>
                   <h1 className="font-display text-[clamp(1.6rem,6vw,2.6rem)] font-black tracking-tight">
                     <ScrambleText text={profile.name.toUpperCase()} />
                   </h1>
@@ -125,7 +145,7 @@ export function Boot() {
                   </button>
                   <div className="mt-5 flex items-center gap-4 text-[11px] text-white/45">
                     <span className="flex items-center gap-2">
-                      <Kbd>Enter</Kbd> para empezar
+                      <Kbd>Enter</Kbd> {t('para empezar', 'to start', 'per iniziare')}
                     </span>
                     <button
                       onClick={() => game.toggleSound()}
@@ -133,8 +153,9 @@ export function Boot() {
                       aria-pressed={sound}
                     >
                       {sound ? <Volume2 size={14} /> : <VolumeX size={14} />}
-                      Sonido {sound ? 'ON' : 'OFF'}
+                      {t('Sonido', 'Sound', 'Suono')} {sound ? 'ON' : 'OFF'}
                     </button>
+                    <LangSwitch />
                   </div>
                 </motion.div>
               )}

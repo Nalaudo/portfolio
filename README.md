@@ -30,6 +30,19 @@ SFX sintetizados con WebAudio (sin assets), activados por defecto; el botón de 
 | Logros y XP | `src/data/achievements.ts` |
 | Rangos y umbrales de XP | `RANKS` en `src/game/store.ts` |
 
+## Idiomas (ES / EN / IT)
+
+Todo el sitio está en español, inglés e italiano, sin librerías (`src/lib/i18n.ts`):
+
+- Los textos de datos son objetos `{ es, en, it }` (tipo `Loc`) y se leen con `t.l(valor)`.
+- Los textos de UI se escriben en línea con `t('español', 'english', 'italiano')`, con `const t = useT()`.
+- Fuera de React (toasts del store) se usa `getT()`.
+- El idioma inicial sale de `?lang=es|en|it`, después de la preferencia guardada y, si no hay, del idioma
+  del navegador (español → ES, italiano → IT, cualquier otro → EN). Se cambia con el selector ES/EN/IT
+  del HUD, de la pantalla de inicio o desde la consola de comandos.
+- Para sumar otro idioma: agregalo a `LANGS` y `LOCALE` en `i18n.ts` y a `LANG_OPTIONS` en
+  `LangSwitch.tsx`; TypeScript marca cada texto al que le falte la traducción.
+
 Para sumar un proyecto: agregalo a `projects`, un ícono en `src/lib/icons.tsx`, una demo en
 `src/components/levels/` y registrala en `DEMOS` (`LevelScreen.tsx`). Ajustá también las coordenadas de
 `LAYOUTS` en `Overworld.tsx` (hay una para escritorio y otra para móvil).

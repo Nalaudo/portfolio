@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { CornerDownLeft, Gamepad2, Mail, Map as MapIcon, Rocket, RotateCcw, Search, User, Backpack, Briefcase, Volume2, Zap, type LucideIcon } from 'lucide-react'
+import { CornerDownLeft, Gamepad2, Languages, Mail, Map as MapIcon, Rocket, RotateCcw, Search, User, Backpack, Briefcase, Volume2, Zap, type LucideIcon } from 'lucide-react'
 import { projects } from '../data/projects'
 import { profile } from '../data/profile'
 import { GithubMark, levelIcon } from '../lib/icons'
@@ -8,6 +8,8 @@ import { closeLevel, openLevel, readLevel, scrollToId } from '../lib/route'
 import { game, useGame } from '../game/store'
 import { sfx } from '../game/audio'
 import { fx } from '../lib/fx'
+import { i18n, useT } from '../lib/i18n'
+import { LANG_OPTIONS } from './ui/LangSwitch'
 
 const GithubIcon = GithubMark as unknown as LucideIcon
 
@@ -25,6 +27,7 @@ export function Palette() {
   const [q, setQ] = useState('')
   const [idx, setIdx] = useState(0)
   const input = useRef<HTMLInputElement>(null)
+  const t = useT()
 
   const nav = (id: string) => () => {
     const wasOpen = !!readLevel()
@@ -34,28 +37,36 @@ export function Palette() {
 
   const cmds: Cmd[] = useMemo(
     () => [
-      { id: 'home', label: 'Ir al inicio', hint: 'sección', icon: Rocket, run: nav('inicio') },
-      { id: 'map', label: 'Ir al mapa de mundos', hint: 'sección', icon: MapIcon, run: nav('mapa') },
-      { id: 'inv', label: 'Ver el inventario (stack)', hint: 'sección', icon: Backpack, run: nav('inventario') },
-      { id: 'trayectoria', label: 'Ver la trayectoria (Kontari, Crombie, ShineForth…)', hint: 'sección', icon: Briefcase, run: nav('trayectoria') },
-      { id: 'profile', label: 'Ver el perfil y logros', hint: 'sección', icon: User, run: nav('perfil') },
-      { id: 'contact', label: 'Ir a contacto', hint: 'sección', icon: Mail, run: nav('contacto') },
+      { id: 'home', label: t('Ir al inicio', 'Go to the top', 'Vai all’inizio'), hint: t('sección', 'section', 'sezione'), icon: Rocket, run: nav('inicio') },
+      { id: 'map', label: t('Ir al mapa de mundos', 'Go to the world map', 'Vai alla mappa dei mondi'), hint: t('sección', 'section', 'sezione'), icon: MapIcon, run: nav('mapa') },
+      { id: 'inv', label: t('Ver el inventario (stack)', 'See the inventory (stack)', 'Vedi l’inventario (stack)'), hint: t('sección', 'section', 'sezione'), icon: Backpack, run: nav('inventario') },
+      { id: 'trayectoria', label: t('Ver la trayectoria (Kontari, Crombie, ShineForth…)', 'See the experience (Kontari, Crombie, ShineForth…)', 'Vedi l’esperienza (Kontari, Crombie, ShineForth…)'), hint: t('sección', 'section', 'sezione'), icon: Briefcase, run: nav('trayectoria') },
+      { id: 'profile', label: t('Ver el perfil y logros', 'See the profile and achievements', 'Vedi il profilo e gli obiettivi'), hint: t('sección', 'section', 'sezione'), icon: User, run: nav('perfil') },
+      { id: 'contact', label: t('Ir a contacto', 'Go to contact', 'Vai ai contatti'), hint: t('sección', 'section', 'sezione'), icon: Mail, run: nav('contacto') },
       ...projects.map<Cmd>((p) => ({
         id: p.id,
-        label: `Nivel ${p.n} · ${p.name}`,
-        hint: p.boss_level ? 'jefe final' : 'entrar al mundo',
+        label: `${t('Nivel', 'Level', 'Livello')} ${p.n} · ${p.name}`,
+        hint: p.boss_level ? t('jefe final', 'final boss', 'boss finale') : t('entrar al mundo', 'enter the world', 'entra nel mondo'),
         icon: levelIcon[p.id],
         run: () => openLevel(p.id),
       })),
-      { id: 'sound', label: 'Activar / silenciar sonido', hint: 'ajuste', icon: Volume2, run: () => game.toggleSound() },
-      { id: 'turbo', label: 'Modo turbo', hint: 'easter egg', icon: Zap, run: () => { game.toggleTurbo(); game.unlock('konami'); fx.confetti() } },
-      { id: 'gh', label: 'Abrir GitHub', hint: 'externo', icon: GithubIcon, run: () => window.open(profile.github, '_blank', 'noopener') },
-      { id: 'in', label: 'Abrir LinkedIn', hint: 'externo', icon: Briefcase, run: () => window.open(profile.linkedin, '_blank', 'noopener') },
-      { id: 'mail', label: 'Escribirme un email', hint: 'externo', icon: Mail, run: () => (location.href = `mailto:${profile.email}`) },
-      { id: 'reset', label: 'Reiniciar partida', hint: 'borra tu progreso', icon: RotateCcw, run: () => game.reset() },
+      // Un comando por idioma, escrito en ese idioma para que se encuentre aunque no entiendas el actual.
+      ...LANG_OPTIONS.filter((o) => o.k !== t.lang).map<Cmd>((o) => ({
+        id: `lang-${o.k}`,
+        label: o.switchTo,
+        hint: t('idioma', 'language', 'lingua'),
+        icon: Languages,
+        run: () => i18n.set(o.k),
+      })),
+      { id: 'sound', label: t('Activar / silenciar sonido', 'Turn sound on / off', 'Attiva / disattiva il suono'), hint: t('ajuste', 'setting', 'impostazione'), icon: Volume2, run: () => game.toggleSound() },
+      { id: 'turbo', label: t('Modo turbo', 'Turbo mode', 'Modalità turbo'), hint: 'easter egg', icon: Zap, run: () => { game.toggleTurbo(); game.unlock('konami'); fx.confetti() } },
+      { id: 'gh', label: t('Abrir GitHub', 'Open GitHub', 'Apri GitHub'), hint: t('externo', 'external', 'esterno'), icon: GithubIcon, run: () => window.open(profile.github, '_blank', 'noopener') },
+      { id: 'in', label: t('Abrir LinkedIn', 'Open LinkedIn', 'Apri LinkedIn'), hint: t('externo', 'external', 'esterno'), icon: Briefcase, run: () => window.open(profile.linkedin, '_blank', 'noopener') },
+      { id: 'mail', label: t('Escribirme un email', 'Send me an email', 'Scrivimi un’email'), hint: t('externo', 'external', 'esterno'), icon: Mail, run: () => (location.href = `mailto:${profile.email}`) },
+      { id: 'reset', label: t('Reiniciar partida', 'Reset game', 'Azzera partita'), hint: t('borra tu progreso', 'erases your progress', 'cancella i tuoi progressi'), icon: RotateCcw, run: () => game.reset() },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [t],
   )
 
   const results = useMemo(() => {
@@ -117,7 +128,7 @@ export function Palette() {
           onMouseDown={(e) => e.target === e.currentTarget && setOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Menú de comandos"
+          aria-label={t('Menú de comandos', 'Command menu', 'Menu dei comandi')}
         >
           <motion.div
             initial={{ y: -20, scale: 0.96, opacity: 0 }}
@@ -149,14 +160,14 @@ export function Palette() {
                     run(results[idx])
                   }
                 }}
-                placeholder="Escribí un comando…  (mapa, kontari, sonido)"
+                placeholder={t('Escribí un comando…  (mapa, kontari, sonido)', 'Type a command…  (map, kontari, sound)', 'Scrivi un comando…  (mappa, kontari, suono)')}
                 className="h-14 flex-1 bg-transparent font-mono text-sm text-white outline-none placeholder:text-white/30"
-                aria-label="Buscar comando"
+                aria-label={t('Buscar comando', 'Search commands', 'Cerca comandi')}
               />
               <span className="kbd">Esc</span>
             </div>
             <ul className="max-h-[52vh] overflow-y-auto p-2" role="listbox">
-              {results.length === 0 && <li className="px-4 py-8 text-center font-mono text-xs text-white/40">Sin resultados. Probá "mapa" o "kontari".</li>}
+              {results.length === 0 && <li className="px-4 py-8 text-center font-mono text-xs text-white/40">{t('Sin resultados. Probá "mapa" o "kontari".', 'No results. Try "map" or "kontari".', 'Nessun risultato. Prova "mappa" o "kontari".')}</li>}
               {results.map((c, i) => (
                 <li key={c.id} role="option" aria-selected={i === idx}>
                   <button
@@ -174,9 +185,9 @@ export function Palette() {
             </ul>
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-2.5 font-mono text-[10px] text-white/35">
               <span className="flex items-center gap-1.5">
-                <Gamepad2 size={12} /> consola de comandos
+                <Gamepad2 size={12} /> {t('consola de comandos', 'command console', 'console dei comandi')}
               </span>
-              <span>↑↓ navegar · ↵ ejecutar</span>
+              <span>{t('↑↓ navegar · ↵ ejecutar', '↑↓ navigate · ↵ run', '↑↓ naviga · ↵ esegui')}</span>
             </div>
           </motion.div>
         </motion.div>

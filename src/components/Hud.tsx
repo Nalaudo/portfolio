@@ -7,13 +7,15 @@ import { scrollToId, closeLevel, readLevel } from '../lib/route'
 import { TOTAL_STARS } from '../data/achievements'
 import { profile } from '../data/profile'
 import { Logo } from './ui/Logo'
+import { LangSwitch } from './ui/LangSwitch'
+import { useT } from '../lib/i18n'
 
 const NAV = [
-  { id: 'mapa', label: 'Mapa' },
-  { id: 'inventario', label: 'Inventario' },
-  { id: 'trayectoria', label: 'Trayectoria' },
-  { id: 'perfil', label: 'Perfil' },
-  { id: 'contacto', label: 'Contacto' },
+  { id: 'mapa', label: { es: 'Mapa', en: 'Map', it: 'Mappa' } },
+  { id: 'inventario', label: { es: 'Inventario', en: 'Inventory', it: 'Inventario' } },
+  { id: 'trayectoria', label: { es: 'Trayectoria', en: 'Experience', it: 'Esperienza' } },
+  { id: 'perfil', label: { es: 'Perfil', en: 'Profile', it: 'Profilo' } },
+  { id: 'contacto', label: { es: 'Contacto', en: 'Contact', it: 'Contatti' } },
 ]
 
 export function Hud() {
@@ -21,6 +23,7 @@ export function Hud() {
   const coins = useGame((s) => s.coins.length)
   const sound = useGame((s) => s.sound)
   const rank = rankFor(xp)
+  const t = useT()
   const [active, setActive] = useState('inicio')
   const bar = useRef<HTMLDivElement>(null)
   const xpBar = useRef<HTMLDivElement>(null)
@@ -65,12 +68,12 @@ export function Hud() {
   return (
     <header className="fixed inset-x-0 top-0 z-[70] border-b border-white/[0.06] bg-[#05060b]/70 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-        <button onClick={() => go('inicio')} className="group flex items-center gap-2.5" aria-label="Volver al inicio">
+        <button onClick={() => go('inicio')} className="group flex items-center gap-2.5" aria-label={t('Volver al inicio', 'Back to top', 'Torna all’inizio')}>
           <Logo size={32} className="rounded-lg transition group-hover:rotate-6 group-hover:scale-110" />
           <span className="hidden font-display text-[13px] font-bold tracking-tight sm:block">{profile.first}</span>
         </button>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Secciones">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label={t('Secciones', 'Sections', 'Sezioni')}>
           {NAV.map((n) => (
             <button
               key={n.id}
@@ -79,7 +82,7 @@ export function Hud() {
               className={`relative rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] transition ${active === n.id ? 'text-accent' : 'text-white/55 hover:text-white'}`}
             >
               {active === n.id && <span className="absolute inset-0 -z-10 rounded-full bg-accent/10 ring-1 ring-accent/30" />}
-              {n.label}
+              {t.l(n.label)}
             </button>
           ))}
         </nav>
@@ -87,20 +90,21 @@ export function Hud() {
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2.5" title={`${xp} XP`}>
             <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-white/45 sm:block">
-              Rango <span className="text-accent">{rank.name}</span>
+              {t('Rango', 'Rank', 'Grado')} <span className="text-accent">{t.l(rank.name)}</span>
             </span>
-            <div ref={xpBar} className="relative h-2 w-20 overflow-hidden rounded-full bg-white/10 sm:w-28" role="progressbar" aria-valuenow={xp} aria-label="Experiencia">
+            <div ref={xpBar} className="relative h-2 w-14 overflow-hidden rounded-full bg-white/10 sm:w-28" role="progressbar" aria-valuenow={xp} aria-label={t('Experiencia', 'Experience points', 'Punti esperienza')}>
               <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-accent to-accent-2 transition-[width] duration-700" style={{ width: `${Math.max(4, rank.progress * 100)}%` }} />
             </div>
             <span className="w-12 font-mono text-[11px] tabular-nums text-white/70">{xp} XP</span>
           </div>
-          <span className="hidden items-center gap-1 font-mono text-[11px] text-amber md:flex" title="Estrellas escondidas">
+          <span className="hidden items-center gap-1 font-mono text-[11px] text-amber md:flex" title={t('Estrellas escondidas', 'Hidden stars', 'Stelle nascoste')}>
             <Star size={13} className="fill-amber" />
             {coins}/{TOTAL_STARS}
           </span>
+          <LangSwitch className="h-8" />
           <button
             onClick={() => game.toggleSound()}
-            aria-label={sound ? 'Silenciar' : 'Activar sonido'}
+            aria-label={sound ? t('Silenciar', 'Mute', 'Silenzia') : t('Activar sonido', 'Turn sound on', 'Attiva il suono')}
             aria-pressed={sound}
             className="grid h-8 w-8 place-items-center rounded-full border border-white/10 text-white/70 transition hover:border-accent hover:text-accent"
           >
@@ -108,7 +112,7 @@ export function Hud() {
           </button>
           <button
             onClick={() => window.dispatchEvent(new Event('nb:palette'))}
-            aria-label="Abrir menú de comandos"
+            aria-label={t('Abrir menú de comandos', 'Open command menu', 'Apri il menu dei comandi')}
             className="flex h-8 items-center gap-1.5 rounded-full border border-white/10 px-2.5 font-mono text-[11px] text-white/70 transition hover:border-accent hover:text-accent"
           >
             <Command size={14} />

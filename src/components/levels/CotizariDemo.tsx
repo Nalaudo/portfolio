@@ -4,6 +4,7 @@ import { Bike, Car, Check, House, Loader2, Mail, MessageCircle, Phone, Send, Sta
 import { game } from '../../game/store'
 import { sfx } from '../../game/audio'
 import { fx } from '../../lib/fx'
+import { useT, type Loc } from '../../lib/i18n'
 
 type Product = 'auto' | 'moto' | 'hogar'
 type Tier = 0 | 1 | 2
@@ -28,26 +29,31 @@ const INSURERS: Insurer[] = [
   { id: 'norte', name: 'Norte Mutual', f: 0.96, rating: 4.1, claimsDays: 3, convenio: 'aliado' },
 ]
 
-const TIERS = [
-  { name: 'Básica', sub: 'Responsabilidad civil', cover: 40, mult: 1 },
-  { name: 'Intermedia', sub: 'Terceros completo', cover: 70, mult: 1.9 },
-  { name: 'Premium', sub: 'Todo riesgo', cover: 100, mult: 3.1 },
+const TIERS: { name: Loc; sub: Loc; cover: number; mult: number }[] = [
+  { name: { es: 'Básica', en: 'Basic', it: 'Base' }, sub: { es: 'Responsabilidad civil', en: 'Liability only', it: 'Solo RC' }, cover: 40, mult: 1 },
+  { name: { es: 'Intermedia', en: 'Intermediate', it: 'Intermedia' }, sub: { es: 'Terceros completo', en: 'Full third-party', it: 'Terzi completa' }, cover: 70, mult: 1.9 },
+  { name: { es: 'Premium', en: 'Premium', it: 'Premium' }, sub: { es: 'Todo riesgo', en: 'Comprehensive', it: 'Kasko' }, cover: 100, mult: 3.1 },
 ]
 
-const PRODUCTS: Record<Product, { label: string; Icon: LucideIcon; age: string; ageRange: [number, number]; ageDef: number; val: string; valRange: [number, number]; valDef: number; rate: number }> = {
-  auto: { label: 'Auto', Icon: Car, age: 'Edad del conductor', ageRange: [18, 80], ageDef: 34, val: 'Valor del vehículo', valRange: [5, 90], valDef: 24, rate: 0.0007 },
-  moto: { label: 'Moto', Icon: Bike, age: 'Edad del conductor', ageRange: [18, 80], ageDef: 27, val: 'Valor de la moto', valRange: [1, 15], valDef: 4, rate: 0.0011 },
-  hogar: { label: 'Hogar', Icon: House, age: 'Antigüedad del inmueble', ageRange: [0, 60], ageDef: 12, val: 'Valor del inmueble', valRange: [20, 300], valDef: 90, rate: 0.00022 },
+const PRODUCTS: Record<Product, { label: Loc; Icon: LucideIcon; age: Loc; ageUnit: Loc; ageRange: [number, number]; ageDef: number; val: Loc; valRange: [number, number]; valDef: number; rate: number }> = {
+  auto: { label: { es: 'Auto', en: 'Car', it: 'Auto' }, Icon: Car, age: { es: 'Edad del conductor', en: 'Driver’s age', it: 'Età del conducente' }, ageUnit: { es: ' años', en: ' yrs', it: ' anni' }, ageRange: [18, 80], ageDef: 34, val: { es: 'Valor del vehículo', en: 'Vehicle value', it: 'Valore del veicolo' }, valRange: [5, 90], valDef: 24, rate: 0.0007 },
+  moto: { label: { es: 'Moto', en: 'Motorcycle', it: 'Moto' }, Icon: Bike, age: { es: 'Edad del conductor', en: 'Rider’s age', it: 'Età del motociclista' }, ageUnit: { es: ' años', en: ' yrs', it: ' anni' }, ageRange: [18, 80], ageDef: 27, val: { es: 'Valor de la moto', en: 'Motorcycle value', it: 'Valore della moto' }, valRange: [1, 15], valDef: 4, rate: 0.0011 },
+  hogar: { label: { es: 'Hogar', en: 'Home', it: 'Casa' }, Icon: House, age: { es: 'Antigüedad del inmueble', en: 'Property age', it: 'Età dell’immobile' }, ageUnit: { es: ' años', en: ' yrs', it: ' anni' }, ageRange: [0, 60], ageDef: 12, val: { es: 'Valor del inmueble', en: 'Property value', it: 'Valore dell’immobile' }, valRange: [20, 300], valDef: 90, rate: 0.00022 },
 }
 
 const WEIGHTS = [
-  { k: 'price', label: 'Precio', color: '#4ade80' },
-  { k: 'cover', label: 'Cobertura', color: '#22d3ee' },
-  { k: 'rating', label: 'Aseguradora', color: '#c084fc' },
-  { k: 'claims', label: 'Siniestros', color: '#ffb547' },
+  { k: 'price', label: { es: 'Precio', en: 'Price', it: 'Prezzo' }, color: '#4ade80' },
+  { k: 'cover', label: { es: 'Cobertura', en: 'Coverage', it: 'Copertura' }, color: '#22d3ee' },
+  { k: 'rating', label: { es: 'Aseguradora', en: 'Insurer', it: 'Compagnia' }, color: '#c084fc' },
+  { k: 'claims', label: { es: 'Siniestros', en: 'Claims', it: 'Sinistri' }, color: '#ffb547' },
 ] as const
 
-const money = (n: number) => `$ ${(Math.round(n / 10) * 10).toLocaleString('es-AR')}`
+const CONVENIO: Record<NonNullable<Convenio>, Loc> = {
+  destacado: { es: 'Destacado', en: 'Featured', it: 'In evidenza' },
+  aliado: { es: 'Aliado', en: 'Partner', it: 'Partner' },
+}
+
+const money = (n: number, locale: string) => `$ ${(Math.round(n / 10) * 10).toLocaleString(locale)}`
 
 function ageFactor(p: Product, age: number) {
   if (p === 'hogar') return 1 + age * 0.006
@@ -76,6 +82,7 @@ export function CotizariDemo() {
   const [bonusOn, setBonusOn] = useState(true)
   const [tierFilter, setTierFilter] = useState<Tier | 'all'>('all')
   const touched = useRef(false)
+  const t = useT()
 
   const touch = () => {
     if (!touched.current) {
@@ -128,25 +135,25 @@ export function CotizariDemo() {
             return (
               <button key={p} onClick={() => pickProduct(p)} aria-pressed={product === p} className={`flex flex-col items-center gap-1.5 rounded-2xl border py-3 transition ${product === p ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/60 hover:border-white/25'}`}>
                 <P.Icon size={20} />
-                <span className="font-mono text-[11px] uppercase tracking-wider">{P.label}</span>
+                <span className="font-mono text-[11px] uppercase tracking-wider">{t.l(P.label)}</span>
               </button>
             )
           })}
         </div>
 
-        <Slider label={cfg.age} value={age} min={cfg.ageRange[0]} max={cfg.ageRange[1]} suffix=" años" onChange={(v) => { setAge(v); touch() }} />
-        <Slider label={cfg.val} value={val} min={cfg.valRange[0]} max={cfg.valRange[1]} prefix="$ " suffix=" M" onChange={(v) => { setVal(v); touch() }} />
+        <Slider id="cz-age" label={t.l(cfg.age)} value={age} min={cfg.ageRange[0]} max={cfg.ageRange[1]} suffix={t.l(cfg.ageUnit)} onChange={(v) => { setAge(v); touch() }} />
+        <Slider id="cz-val" label={t.l(cfg.val)} value={val} min={cfg.valRange[0]} max={cfg.valRange[1]} prefix="$ " suffix=" M" onChange={(v) => { setVal(v); touch() }} />
         <div>
-          <Slider label="Qué priorizás" value={prio} min={0} max={100} format={(v) => (v < 35 ? 'Precio' : v > 65 ? 'Cobertura' : 'Equilibrio')} onChange={(v) => { setPrio(v); touch() }} />
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-white/30"><span>← precio</span><span>cobertura →</span></div>
+          <Slider id="cz-prio" label={t('Qué priorizás', 'What you prioritize', 'Cosa preferisci')} value={prio} min={0} max={100} format={(v) => (v < 35 ? t('Precio', 'Price', 'Prezzo') : v > 65 ? t('Cobertura', 'Coverage', 'Copertura') : t('Equilibrio', 'Balance', 'Equilibrio'))} onChange={(v) => { setPrio(v); touch() }} />
+          <div className="mt-1 flex justify-between font-mono text-[10px] text-white/30"><span>← {t('precio', 'price', 'prezzo')}</span><span>{t('cobertura', 'coverage', 'copertura')} →</span></div>
         </div>
 
         <div className="rounded-2xl border border-white/[0.07] bg-black/25 p-4">
-          <p className="label mb-3">Pesos del score</p>
+          <p className="label mb-3">{t('Pesos del score', 'Score weights', 'Pesi dello score')}</p>
           <div className="space-y-2">
             {WEIGHTS.map((x) => (
               <div key={x.k} className="flex items-center gap-2.5 text-xs">
-                <span className="w-[74px] text-white/55">{x.label}</span>
+                <span className="w-[74px] text-white/55">{t.l(x.label)}</span>
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
                   <motion.span className="block h-full rounded-full" style={{ background: x.color }} animate={{ width: `${w[x.k] * 100 * 1.6}%` }} transition={{ type: 'spring', stiffness: 200, damping: 24 }} />
                 </span>
@@ -156,17 +163,17 @@ export function CotizariDemo() {
           </div>
           <label className="mt-4 flex cursor-pointer items-center gap-3 text-xs text-white/60">
             <input type="checkbox" checked={bonusOn} onChange={(e) => { setBonusOn(e.target.checked); sfx.click(); touch() }} className="h-4 w-4 accent-[var(--accent)]" />
-            Aplicar bonus por convenio divulgado (+1 Aliado · +3 Destacado)
+            {t('Aplicar bonus por convenio divulgado (+1 Aliado · +3 Destacado)', 'Apply disclosed partnership bonus (+1 Partner · +3 Featured)', 'Applica il bonus di convenzione dichiarato (+1 Partner · +3 In evidenza)')}
           </label>
         </div>
       </div>
 
       <div>
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="label mr-1">Cobertura</span>
-          {(['all', 0, 1, 2] as const).map((t) => (
-            <button key={t} onClick={() => { sfx.click(); setTierFilter(t) }} className={`chip transition ${tierFilter === t ? '!border-accent !bg-accent/15 !text-accent' : 'hover:!border-white/30'}`}>
-              {t === 'all' ? 'Todas' : TIERS[t].name}
+          <span className="label mr-1">{t('Cobertura', 'Coverage', 'Copertura')}</span>
+          {(['all', 0, 1, 2] as const).map((tier) => (
+            <button key={tier} onClick={() => { sfx.click(); setTierFilter(tier) }} className={`chip transition ${tierFilter === tier ? '!border-accent !bg-accent/15 !text-accent' : 'hover:!border-white/30'}`}>
+              {tier === 'all' ? t('Todas', 'All', 'Tutte') : t.l(TIERS[tier].name)}
             </button>
           ))}
         </div>
@@ -181,14 +188,14 @@ export function CotizariDemo() {
                   <div className="min-w-[150px] flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-display text-[15px] font-bold">{o.insurer.name}</span>
-                      {top && <span className="flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-mono text-[9.5px] font-bold uppercase text-void"><Star size={10} className="fill-current" /> Recomendada</span>}
-                      {o.insurer.convenio && <span className="rounded-full border border-white/15 px-2 py-0.5 font-mono text-[9.5px] uppercase text-white/55">{o.insurer.convenio === 'destacado' ? 'Destacado' : 'Aliado'}</span>}
+                      {top && <span className="flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-mono text-[9.5px] font-bold uppercase text-void"><Star size={10} className="fill-current" /> {t('Recomendada', 'Recommended', 'Consigliata')}</span>}
+                      {o.insurer.convenio && <span className="rounded-full border border-white/15 px-2 py-0.5 font-mono text-[9.5px] uppercase text-white/55">{t.l(CONVENIO[o.insurer.convenio])}</span>}
                     </div>
-                    <p className="mt-0.5 text-xs text-white/45">{TIERS[o.tier].name} · {TIERS[o.tier].sub} · ★ {o.insurer.rating}</p>
+                    <p className="mt-0.5 text-xs text-white/45">{t.l(TIERS[o.tier].name)} · {t.l(TIERS[o.tier].sub)} · ★ {o.insurer.rating}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-display text-lg font-bold tabular-nums">{money(o.price)}</p>
-                    <p className="font-mono text-[10px] text-white/35">por mes</p>
+                    <p className="font-display text-lg font-bold tabular-nums">{money(o.price, t.locale)}</p>
+                    <p className="font-mono text-[10px] text-white/35">{t('por mes', 'per month', 'al mese')}</p>
                   </div>
                   <div className="w-full sm:w-[120px]">
                     <div className="mb-1 flex items-baseline justify-between">
@@ -204,15 +211,33 @@ export function CotizariDemo() {
                 </div>
                 {top && (
                   <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3 border-t border-white/10 pt-3 text-[12.5px] leading-relaxed text-white/60">
-                    Gana por combinar <b className="text-white/85">{o.parts.price > 75 ? 'buen precio' : 'precio razonable'}</b> con <b className="text-white/85">cobertura {TIERS[o.tier].name.toLowerCase()}</b> y una aseguradora con {o.insurer.claimsDays === 1 ? 'respuesta de siniestros en el día' : `siniestros en ~${o.insurer.claimsDays} días`}.
-                    {o.bonus > 0 && ' Incluye el bonus de convenio, divulgado.'}
+                    {t(
+                      <>
+                        Gana por combinar <b className="text-white/85">{o.parts.price > 75 ? 'buen precio' : 'precio razonable'}</b> con <b className="text-white/85">cobertura {t.l(TIERS[o.tier].name).toLowerCase()}</b> y una aseguradora con {o.insurer.claimsDays === 1 ? 'respuesta de siniestros en el día' : `siniestros en ~${o.insurer.claimsDays} días`}.
+                        {o.bonus > 0 && ' Incluye el bonus de convenio, divulgado.'}
+                      </>,
+                      <>
+                        It wins by combining <b className="text-white/85">{o.parts.price > 75 ? 'a great price' : 'a fair price'}</b> with <b className="text-white/85">{t.l(TIERS[o.tier].name).toLowerCase()} coverage</b> and an insurer that {o.insurer.claimsDays === 1 ? 'handles claims same-day' : `settles claims in ~${o.insurer.claimsDays} days`}.
+                        {o.bonus > 0 && ' Includes the disclosed partnership bonus.'}
+                      </>,
+                      <>
+                        Vince perché unisce <b className="text-white/85">{o.parts.price > 75 ? 'un ottimo prezzo' : 'un prezzo ragionevole'}</b> a una <b className="text-white/85">copertura {t.l(TIERS[o.tier].name).toLowerCase()}</b> e a una compagnia che {o.insurer.claimsDays === 1 ? 'gestisce i sinistri in giornata' : `liquida i sinistri in ~${o.insurer.claimsDays} giorni`}.
+                        {o.bonus > 0 && ' Include il bonus di convenzione, dichiarato.'}
+                      </>,
+                    )}
                   </motion.p>
                 )}
               </motion.li>
             )
           })}
         </ul>
-        <p className="mt-3 text-[11.5px] leading-snug text-white/35">Regla de Cotizari: la recomendada es siempre la de mayor score, con o sin convenio. Apagá el bonus y comprobalo.</p>
+        <p className="mt-3 text-[11.5px] leading-snug text-white/35">
+          {t(
+            'Regla de Cotizari: la recomendada es siempre la de mayor score, con o sin convenio. Apagá el bonus y comprobalo.',
+            'Cotizari’s rule: the recommended option is always the highest score, partner or not. Turn the bonus off and check.',
+            'Regola di Cotizari: la consigliata è sempre quella con lo score più alto, con o senza convenzione. Disattiva il bonus e verificalo.',
+          )}
+        </p>
 
         <Agent />
       </div>
@@ -220,8 +245,7 @@ export function CotizariDemo() {
   )
 }
 
-function Slider({ label, value, min, max, prefix = '', suffix = '', format, onChange }: { label: string; value: number; min: number; max: number; prefix?: string; suffix?: string; format?: (v: number) => string; onChange: (v: number) => void }) {
-  const id = label.replace(/\s/g, '-')
+function Slider({ id, label, value, min, max, prefix = '', suffix = '', format, onChange }: { id: string; label: string; value: number; min: number; max: number; prefix?: string; suffix?: string; format?: (v: number) => string; onChange: (v: number) => void }) {
   return (
     <div>
       <div className="mb-2.5 flex items-baseline justify-between">
@@ -235,9 +259,9 @@ function Slider({ label, value, min, max, prefix = '', suffix = '', format, onCh
 
 // Agente de contacto simulado: email, llamada o mensaje.
 const CHANNELS = [
-  { k: 'email', label: 'Email', Icon: Mail, svc: 'Resend' },
-  { k: 'mensaje', label: 'Mensaje', Icon: MessageCircle, svc: 'WhatsApp Cloud API' },
-  { k: 'llamada', label: 'Llamada', Icon: Phone, svc: 'Twilio Voice' },
+  { k: 'email', label: { es: 'Email', en: 'Email', it: 'Email' }, Icon: Mail, svc: 'Resend' },
+  { k: 'mensaje', label: { es: 'Mensaje', en: 'Message', it: 'Messaggio' }, Icon: MessageCircle, svc: 'WhatsApp Cloud API' },
+  { k: 'llamada', label: { es: 'Llamada', en: 'Call', it: 'Chiamata' }, Icon: Phone, svc: 'Twilio Voice' },
 ] as const
 
 function Agent() {
@@ -245,6 +269,7 @@ function Agent() {
   const [log, setLog] = useState<string[]>([])
   const [running, setRunning] = useState(false)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const t = useT()
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
@@ -254,13 +279,30 @@ function Agent() {
     setRunning(true)
     setLog([])
     const id = 4800 + Math.floor(Math.random() * 199)
-    const lines = [
-      `lead #A-${id} creado · estado: nuevo`,
-      `agente → canal "${ch.k}" vía ${ch.svc} (simulado)`,
-      'primer contacto enviado ✓',
-      'actividad registrada en el lead',
-      'panel del broker → estado: contactado',
-    ]
+    const channel = t.l(ch.label).toLowerCase()
+    const lines = t(
+      [
+        `lead #A-${id} creado · estado: nuevo`,
+        `agente → canal "${channel}" vía ${ch.svc} (simulado)`,
+        'primer contacto enviado ✓',
+        'actividad registrada en el lead',
+        'panel del broker → estado: contactado',
+      ],
+      [
+        `lead #A-${id} created · status: new`,
+        `agent → "${channel}" channel via ${ch.svc} (simulated)`,
+        'first contact sent ✓',
+        'activity logged on the lead',
+        'broker dashboard → status: contacted',
+      ],
+      [
+        `lead #A-${id} creato · stato: nuovo`,
+        `agente → canale "${channel}" via ${ch.svc} (simulato)`,
+        'primo contatto inviato ✓',
+        'attività registrata sul lead',
+        'pannello del broker → stato: contattato',
+      ],
+    )
     lines.forEach((l, i) => {
       timers.current.push(
         setTimeout(() => {
@@ -282,27 +324,27 @@ function Agent() {
     <div className="mt-6 rounded-2xl border border-white/[0.08] bg-black/30 p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="label !text-accent">Desafío</p>
-          <p className="font-display text-base font-bold">Que el agente te contacte</p>
+          <p className="label !text-accent">{t('Desafío', 'Challenge', 'Sfida')}</p>
+          <p className="font-display text-base font-bold">{t('Que el agente te contacte', 'Get the agent to reach out', 'Fatti contattare dall’agente')}</p>
         </div>
         <div className="flex gap-2">
           {CHANNELS.map((c) => (
-            <button key={c.k} onClick={() => { sfx.click(); setCh(c) }} aria-pressed={ch.k === c.k} aria-label={c.label} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] transition ${ch.k === c.k ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/55 hover:border-white/25'}`}>
-              <c.Icon size={13} /> {c.label}
+            <button key={c.k} onClick={() => { sfx.click(); setCh(c) }} aria-pressed={ch.k === c.k} aria-label={t.l(c.label)} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] transition ${ch.k === c.k ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/55 hover:border-white/25'}`}>
+              <c.Icon size={13} /> {t.l(c.label)}
             </button>
           ))}
         </div>
       </div>
       <div className="mt-4 flex flex-col gap-4 sm:flex-row">
         <button onClick={run} disabled={running} className="btn btn-primary shrink-0">
-          {running ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Pedir contacto
+          {running ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} {t('Pedir contacto', 'Request contact', 'Richiedi contatto')}
         </button>
         <div className="min-h-[92px] flex-1 rounded-xl bg-black/40 p-3 font-mono text-[11.5px] leading-relaxed">
-          {log.length === 0 && <p className="text-white/30">La bitácora del agente aparece acá.</p>}
+          {log.length === 0 && <p className="text-white/30">{t('La bitácora del agente aparece acá.', 'The agent’s log shows up here.', 'Il registro dell’agente appare qui.')}</p>}
           <AnimatePresence initial={false}>
             {log.map((l, i) => (
               <motion.p key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} className="text-white/70">
-                <span className="text-accent">[agente] </span>
+                <span className="text-accent">[{t('agente', 'agent', 'agente')}] </span>
                 {l}
                 {i === log.length - 1 && !running && <Check size={12} className="ml-1.5 inline text-mint" />}
               </motion.p>

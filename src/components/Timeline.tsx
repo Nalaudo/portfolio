@@ -1,21 +1,29 @@
 import { useRef, useState } from 'react'
 import { motion, useInView } from 'motion/react'
 import { ArrowUpRight, Backpack, GraduationCap, Languages } from 'lucide-react'
-import { monthsBetween, roles, type Role } from '../data/experience'
+import { kindLabel, monthsBetween, roles, type Role } from '../data/experience'
 import { profile } from '../data/profile'
 import { sfx } from '../game/audio'
 import { equip } from '../lib/equip'
 import { openLevel, scrollToId } from '../lib/route'
 import { SectionTitle } from './ui/bits'
+import { useT, type T } from '../lib/i18n'
 
-const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-const fmt = (d: [number, number]) => `${MONTHS[d[1] - 1]} ${d[0]}`
-const span = (r: Role) => `${fmt(r.from)} – ${r.to ? fmt(r.to) : 'presente'}`
-const dur = (r: Role) => {
+const MONTHS = {
+  es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  it: ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'],
+}
+const fmt = (d: [number, number], t: T) => `${t.l(MONTHS)[d[1] - 1]} ${d[0]}`
+const span = (r: Role, t: T) => `${fmt(r.from, t)} – ${r.to ? fmt(r.to, t) : t('presente', 'present', 'oggi')}`
+const dur = (r: Role, t: T) => {
   const m = monthsBetween(r.from, r.to)
   const y = Math.floor(m / 12)
   const rest = m % 12
-  return [y ? `${y} ${y > 1 ? 'años' : 'año'}` : '', rest ? `${rest} ${rest > 1 ? 'meses' : 'mes'}` : ''].filter(Boolean).join(' ')
+  return [
+    y ? `${y} ${y > 1 ? t('años', 'yrs', 'anni') : t('año', 'yr', 'anno')}` : '',
+    rest ? `${rest} ${rest > 1 ? t('meses', 'mos', 'mesi') : t('mes', 'mo', 'mese')}` : '',
+  ].filter(Boolean).join(' ')
 }
 
 // Eje del gantt: jul 2023 → dic 2026 (en meses).
@@ -27,6 +35,7 @@ export function Timeline() {
   const [hover, setHover] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.3 })
+  const t = useT()
   const now = new Date()
   // "Hoy" con fracción del mes, para que la línea caiga en el día real y no al inicio del mes.
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
@@ -58,20 +67,20 @@ export function Timeline() {
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
         <div>
           <p className="font-mono text-[10.5px] uppercase tracking-[0.18em]" style={{ color: r.color }}>
-            {r.kind}
-            {r.wip && ' · en desarrollo'}
+            {t.l(kindLabel[r.kind])}
+            {r.wip && t(' · en desarrollo', ' · in development', ' · in sviluppo')}
           </p>
           <h3 className="mt-1 font-display text-2xl font-black leading-tight">{r.company}</h3>
-          <p className="mt-0.5 text-[15px] text-white/70">{r.role}</p>
+          <p className="mt-0.5 text-[15px] text-white/70">{t.l(r.role)}</p>
         </div>
         <div className="text-left font-mono text-xs text-white/50 sm:text-right">
-          <p className="text-white/80">{span(r)}</p>
-          <p>{dur(r)}{r.place ? ` · ${r.place}` : ''}</p>
+          <p className="text-white/80">{span(r, t)}</p>
+          <p>{dur(r, t)}{r.place ? ` · ${t.l(r.place)}` : ''}</p>
         </div>
       </div>
 
       <ul className="mt-5 space-y-2.5">
-        {r.bullets.map((b) => (
+        {t.l(r.bullets).map((b) => (
           <li key={b} className="flex gap-3 text-[14.5px] leading-relaxed text-white/65">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: r.color }} />
             {b}
@@ -81,24 +90,24 @@ export function Timeline() {
 
       {r.tags && (
         <div className="mt-5 flex flex-wrap gap-2">
-          {r.tags.map((t) => (
-            <span key={t} className="chip" style={{ borderColor: `${r.color}44`, color: r.color }}>{t}</span>
+          {t.l(r.tags).map((tag) => (
+            <span key={tag} className="chip" style={{ borderColor: `${r.color}44`, color: r.color }}>{tag}</span>
           ))}
         </div>
       )}
 
       <div className="mt-5 flex flex-wrap gap-2.5 border-t border-white/[0.07] pt-4">
         <button onClick={() => showStack(r)} className="btn btn-ghost !px-4 !py-2 !text-[10.5px]">
-          <Backpack size={13} /> Ver su stack en el inventario
+          <Backpack size={13} /> {t('Ver su stack en el inventario', 'See its stack in the inventory', 'Vedi il suo stack nell’inventario')}
         </button>
         {r.world && (
           <button onClick={() => { sfx.open(); openLevel(r.world!) }} className="btn btn-ghost !px-4 !py-2 !text-[10.5px]">
-            Jugar su nivel <ArrowUpRight size={13} />
+            {t('Jugar su nivel', 'Play its level', 'Gioca il suo livello')} <ArrowUpRight size={13} />
           </button>
         )}
         {r.link && (
           <a href={r.link} target="_blank" rel="noopener noreferrer" className="btn btn-ghost !px-4 !py-2 !text-[10.5px]">
-            Sitio online <ArrowUpRight size={13} />
+            {t('Sitio online', 'Live site', 'Sito online')} <ArrowUpRight size={13} />
           </a>
         )}
       </div>
@@ -108,8 +117,15 @@ export function Timeline() {
   return (
     <section id="trayectoria" className="relative px-4 py-24 sm:px-6 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle eyebrow="03 · Trayectoria" title={<>La <span className="text-gradient">campaña</span> hasta hoy.</>}>
-          Más de 3 años construyendo software end-to-end, entre empleos, mi propio SaaS y proyectos freelance. Pasá el mouse por cada barra y equipá su stack.
+        <SectionTitle
+          eyebrow={t('03 · Trayectoria', '03 · Experience', '03 · Esperienza')}
+          title={t(<>La <span className="text-gradient">campaña</span> hasta hoy.</>, <>The <span className="text-gradient">campaign</span> so far.</>, <>La <span className="text-gradient">campagna</span> fino a oggi.</>)}
+        >
+          {t(
+            'Más de 3 años construyendo software end-to-end, entre empleos, mi propio SaaS y proyectos freelance. Pasá el mouse por cada barra y equipá su stack.',
+            '3+ years building software end-to-end, across jobs, my own SaaS and freelance projects. Hover over each bar and equip its stack.',
+            'Più di 3 anni a costruire software end-to-end, tra impieghi, il mio SaaS e progetti freelance. Passa il mouse su ogni barra ed equipaggia il suo stack.',
+          )}
         </SectionTitle>
 
         {/* gantt */}
@@ -125,7 +141,7 @@ export function Timeline() {
                 <span key={y} className="pointer-events-none absolute inset-y-0 w-px bg-white/[0.06]" style={{ left: `${((y * 12 - START) / total) * 100}%` }} />
               ))}
               <span className="pointer-events-none absolute -bottom-1 -top-1 w-0 border-l border-dashed border-accent/60" style={{ left: pct(nowPos - START) }}>
-                <span className="absolute -top-5 left-0 -translate-x-1/2 whitespace-nowrap rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] font-bold text-void">HOY</span>
+                <span className="absolute -top-5 left-0 -translate-x-1/2 whitespace-nowrap rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] font-bold text-void">{t('HOY', 'TODAY', 'OGGI')}</span>
               </span>
               {[...roles].sort((a, b) => idx(a.from) - idx(b.from)).map((r, i) => {
                 const a = Math.max(0, idx(r.from) - START)
@@ -142,7 +158,7 @@ export function Timeline() {
                       transition={{ duration: 0.9, delay: 0.12 * i, ease: [0.16, 1, 0.3, 1] }}
                       className="absolute flex h-8 origin-left items-center overflow-hidden rounded-full px-3 text-left font-mono text-[11px] font-bold text-void transition-[filter] hover:brightness-125"
                       style={{ left: `min(${pct(a)}, calc(${pct(b)} - 74px))`, width: `max(${pct(b - a)}, 74px)`, background: r.color, opacity: hover && hover !== r.id ? 0.35 : 1 }}
-                      aria-label={`${r.company}, ${span(r)}`}
+                      aria-label={`${r.company}, ${span(r, t)}`}
                     >
                       <span className="truncate">{r.company}</span>
                     </motion.button>
@@ -155,11 +171,11 @@ export function Timeline() {
 
         <div className="grid gap-10 lg:grid-cols-[1.35fr_1fr]">
           <div>
-            <p className="label mb-5">Roles principales</p>
+            <p className="label mb-5">{t('Roles principales', 'Main roles', 'Ruoli principali')}</p>
             <div className="relative space-y-5 md:ml-6 md:border-l md:border-white/10 md:pl-8">{main.map(card)}</div>
           </div>
           <div>
-            <p className="label mb-5">Freelance y proyectos propios</p>
+            <p className="label mb-5">{t('Freelance y proyectos propios', 'Freelance and own projects', 'Freelance e progetti personali')}</p>
             <div className="space-y-5">{side.map((r, i) => card(r, i))}</div>
           </div>
         </div>
@@ -167,24 +183,24 @@ export function Timeline() {
         {/* formación, idiomas y habilidades blandas */}
         <div className="mt-16 grid gap-4 md:grid-cols-3">
           <div className="panel p-6">
-            <p className="label mb-4 flex items-center gap-2 !text-accent"><GraduationCap size={13} /> Formación</p>
+            <p className="label mb-4 flex items-center gap-2 !text-accent"><GraduationCap size={13} /> {t('Formación', 'Education', 'Formazione')}</p>
             <ul className="space-y-4">
               {profile.education.map((e) => (
-                <li key={e.title}>
-                  <p className="text-[14.5px] font-semibold leading-snug">{e.title}</p>
-                  <p className="font-mono text-[11px] text-white/45">{e.place} · {e.when}</p>
+                <li key={e.title.es}>
+                  <p className="text-[14.5px] font-semibold leading-snug">{t.l(e.title)}</p>
+                  <p className="font-mono text-[11px] text-white/45">{e.place} · {t.l(e.when)}</p>
                 </li>
               ))}
             </ul>
           </div>
           <div className="panel p-6">
-            <p className="label mb-4 flex items-center gap-2 !text-accent"><Languages size={13} /> Idiomas</p>
+            <p className="label mb-4 flex items-center gap-2 !text-accent"><Languages size={13} /> {t('Idiomas', 'Languages', 'Lingue')}</p>
             <ul className="space-y-4">
               {profile.languages.map((l) => (
-                <li key={l.name}>
+                <li key={l.name.es}>
                   <div className="mb-1.5 flex items-baseline justify-between text-sm">
-                    <span className="font-semibold">{l.name}</span>
-                    <span className="font-mono text-[11px] text-white/50">{l.level}</span>
+                    <span className="font-semibold">{t.l(l.name)}</span>
+                    <span className="font-mono text-[11px] text-white/50">{t.l(l.level)}</span>
                   </div>
                   <span className="block h-1.5 overflow-hidden rounded-full bg-white/10">
                     <motion.span className="block h-full rounded-full bg-gradient-to-r from-accent to-accent-2" initial={{ width: 0 }} whileInView={{ width: `${l.pct}%` }} viewport={{ once: true }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
@@ -194,9 +210,9 @@ export function Timeline() {
             </ul>
           </div>
           <div className="panel p-6">
-            <p className="label mb-4 !text-accent">Habilidades blandas</p>
+            <p className="label mb-4 !text-accent">{t('Habilidades blandas', 'Soft skills', 'Soft skill')}</p>
             <div className="flex flex-wrap gap-2">
-              {profile.soft.map((s) => (
+              {t.l(profile.soft).map((s) => (
                 <span key={s} className="chip">{s}</span>
               ))}
             </div>

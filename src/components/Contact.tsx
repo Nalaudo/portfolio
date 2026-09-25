@@ -8,11 +8,12 @@ import { fx } from '../lib/fx'
 import { GithubMark, LinkedinMark } from '../lib/icons'
 import { Mascot } from './ui/Mascot'
 import { Relic } from './ui/bits'
+import { useT, type Loc } from '../lib/i18n'
 
-const SUBJECT: Record<string, string> = {
-  recruiter: 'Hablemos: vi tu portfolio',
-  client: 'Tengo un proyecto para vos',
-  dev: 'Hola, vi tu portfolio',
+const SUBJECT: Record<string, Loc> = {
+  recruiter: { es: 'Hablemos: vi tu portfolio', en: 'Let’s talk: I saw your portfolio', it: 'Parliamone: ho visto il tuo portfolio' },
+  client: { es: 'Tengo un proyecto para vos', en: 'I have a project for you', it: 'Ho un progetto per te' },
+  dev: { es: 'Hola, vi tu portfolio', en: 'Hi, I saw your portfolio', it: 'Ciao, ho visto il tuo portfolio' },
 }
 
 export function Contact() {
@@ -26,6 +27,7 @@ export function Contact() {
   const [n, setN] = useState(9)
   const [over, setOver] = useState(false)
   const [copied, setCopied] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     if (inView) game.unlock('contact')
@@ -57,7 +59,7 @@ export function Contact() {
     return () => clearTimeout(t)
   }, [over])
 
-  const mail = `mailto:${profile.email}?subject=${encodeURIComponent(SUBJECT[persona ?? 'client'])}`
+  const mail = `mailto:${profile.email}?subject=${encodeURIComponent(t.l(SUBJECT[persona ?? 'client']))}`
 
   const insertCoin = (e: React.MouseEvent) => {
     sfx.coin()
@@ -71,10 +73,10 @@ export function Contact() {
       await navigator.clipboard.writeText(profile.email)
       setCopied(true)
       sfx.success()
-      toastStore.push({ kind: 'info', title: 'Copiado', text: profile.email })
+      toastStore.push({ kind: 'info', title: t('Copiado', 'Copied', 'Copiato'), text: profile.email })
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toastStore.push({ kind: 'info', title: 'No pude copiar', text: `Mi email es ${profile.email}` })
+      toastStore.push({ kind: 'info', title: t('No pude copiar', 'Couldn’t copy', 'Non sono riuscito a copiare'), text: t(`Mi email es ${profile.email}`, `My email is ${profile.email}`, `La mia email è ${profile.email}`) })
     }
   }
 
@@ -90,16 +92,20 @@ export function Contact() {
 
           <div className="relative grid items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <p className="label mb-4 flex items-center gap-3 !text-accent"><span className="h-px w-8 bg-accent" />05 · Sala final</p>
+              <p className="label mb-4 flex items-center gap-3 !text-accent"><span className="h-px w-8 bg-accent" />{t('05 · Sala final', '05 · Final room', '05 · Sala finale')}</p>
               <h2 className="font-display text-[clamp(2.2rem,6vw,4.6rem)] font-black leading-[0.95] tracking-tight">
-                ¿Jugamos <span className="text-gradient">juntos</span>?
+                {t(<>¿Jugamos <span className="text-gradient">juntos</span>?</>, <>Shall we play <span className="text-gradient">together</span>?</>, <>Giochiamo <span className="text-gradient">insieme</span>?</>)}
               </h2>
               <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/65">
-                Si tenés un producto para construir, un sistema que ordenar o una idea que todavía no tiene forma, contame. Respondo rápido y me gusta entender el problema antes de escribir código.
+                {t(
+                  'Si tenés un producto para construir, un sistema que ordenar o una idea que todavía no tiene forma, contame. Respondo rápido y me gusta entender el problema antes de escribir código.',
+                  'If you have a product to build, a system to untangle or an idea that hasn’t taken shape yet, tell me about it. I reply fast and I like to understand the problem before writing code.',
+                  'Se hai un prodotto da costruire, un sistema da mettere in ordine o un’idea che non ha ancora forma, raccontamela. Rispondo in fretta e mi piace capire il problema prima di scrivere codice.',
+                )}
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <a href={mail} onClick={insertCoin} className="btn btn-primary !px-7 !py-4">
-                  <Mail size={16} /> Insertar moneda · Escribirme
+                  <Mail size={16} /> {t('Insertar moneda · Escribirme', 'Insert coin · Email me', 'Inserisci una moneta · Scrivimi')}
                 </a>
                 <a href={profile.github} target="_blank" rel="noopener noreferrer" onClick={() => sfx.click()} className="btn btn-ghost !py-4">
                   <GithubMark size={16} /> GitHub
@@ -107,10 +113,10 @@ export function Contact() {
                 <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" onClick={() => sfx.click()} className="btn btn-ghost !py-4">
                   <LinkedinMark size={16} /> LinkedIn
                 </a>
-                <button onClick={copy} className="btn btn-ghost !py-4" aria-label="Copiar email">
+                <button onClick={copy} className="btn btn-ghost !py-4" aria-label={t('Copiar email', 'Copy email', 'Copia email')}>
                   {copied ? <Check size={16} className="text-mint" /> : <Copy size={16} />}
                   <span className="hidden sm:inline normal-case tracking-normal">{profile.email}</span>
-                  <span className="sm:hidden">Copiar email</span>
+                  <span className="sm:hidden">{t('Copiar email', 'Copy email', 'Copia email')}</span>
                 </button>
               </div>
             </div>
@@ -140,11 +146,11 @@ export function Contact() {
                         <br />
                         OVER
                       </p>
-                      <p className="label mt-2 !text-rose">insertá una moneda</p>
+                      <p className="label mt-2 !text-rose">{t('insertá una moneda', 'insert a coin', 'inserisci una moneta')}</p>
                     </>
                   ) : (
                     <>
-                      <p className="label !text-accent">¿Continuar?</p>
+                      <p className="label !text-accent">{t('¿Continuar?', 'Continue?', 'Continuare?')}</p>
                       <p className="font-display text-7xl font-black tabular-nums leading-none">{n}</p>
                     </>
                   )}
@@ -154,15 +160,15 @@ export function Contact() {
                 <Mascot size={54} className={over ? 'animate-shake' : undefined} />
                 {over ? (
                   <p className="pb-2 font-mono text-[11px] text-rose">
-                    Bit está en game over.
+                    {t('Bit está en game over.', 'Bit is in game over.', 'Bit è in game over.')}
                     <br />
-                    Tocá "Insertar moneda" o esperá el revive.
+                    {t('Tocá "Insertar moneda" o esperá el revive.', 'Hit "Insert coin" or wait for the respawn.', 'Tocca "Inserisci una moneta" o aspetta il respawn.')}
                   </p>
                 ) : (
                   <p className="pb-2 font-mono text-[11px] text-white/45">
-                    Bit te espera.
+                    {t('Bit te espera.', 'Bit is waiting for you.', 'Bit ti aspetta.')}
                     <br />
-                    No lo dejes en game over.
+                    {t('No lo dejes en game over.', 'Don’t leave it in game over.', 'Non lasciarlo in game over.')}
                   </p>
                 )}
               </div>
@@ -172,7 +178,7 @@ export function Contact() {
 
         <footer className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/[0.07] pt-8 font-mono text-[11px] text-white/35 sm:flex-row">
           <p>© {new Date().getFullYear()} {profile.name} · {profile.location}</p>
-          <p className="text-center">Hecho a mano con React, Tailwind y motion. Pista: ↑ ↑ ↓ ↓ ← → ← → B A</p>
+          <p className="text-center">{t('Hecho a mano con React, Tailwind y motion. Pista: ↑ ↑ ↓ ↓ ← → ← → B A', 'Handmade with React, Tailwind and motion. Hint: ↑ ↑ ↓ ↓ ← → ← → B A', 'Fatto a mano con React, Tailwind e motion. Indizio: ↑ ↑ ↓ ↓ ← → ← → B A')}</p>
         </footer>
       </div>
     </section>

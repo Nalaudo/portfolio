@@ -7,14 +7,15 @@ import { sfx } from '../game/audio'
 import { openLevel, scrollToId } from '../lib/route'
 import { Mascot } from './ui/Mascot'
 import { Counter, Relic, ScrambleText } from './ui/bits'
+import { useT, type Loc } from '../lib/i18n'
 
 interface PersonaDef {
   id: Persona
   icon: LucideIcon
-  title: string
-  sub: string
-  msg: string
-  cta: string
+  title: Loc
+  sub: Loc
+  msg: Loc
+  cta: Loc
   act: () => void
 }
 
@@ -22,33 +23,49 @@ const PERSONAS: PersonaDef[] = [
   {
     id: 'recruiter',
     icon: Briefcase,
-    title: 'Vengo a reclutar',
-    sub: 'Quiero evaluar el perfil',
-    msg: 'Misión recomendada: mirá el inventario de tecnologías y después enfrentá al jefe final, donde está lo más complejo.',
-    cta: 'Abrir el inventario',
+    title: { es: 'Vengo a reclutar', en: 'I’m recruiting', it: 'Sto reclutando' },
+    sub: { es: 'Quiero evaluar el perfil', en: 'I want to assess the profile', it: 'Voglio valutare il profilo' },
+    msg: {
+      es: 'Misión recomendada: mirá el inventario de tecnologías y después enfrentá al jefe final, donde está lo más complejo.',
+      en: 'Recommended mission: check the tech inventory, then face the final boss, where the most complex work lives.',
+      it: 'Missione consigliata: guarda l’inventario delle tecnologie e poi affronta il boss finale, dove c’è la parte più complessa.',
+    },
+    cta: { es: 'Abrir el inventario', en: 'Open the inventory', it: 'Apri l’inventario' },
     act: () => scrollToId('inventario'),
   },
   {
     id: 'client',
     icon: Building2,
-    title: 'Tengo un proyecto',
-    sub: 'Busco quién lo construya',
-    msg: 'Misión recomendada: jugá una o dos demos para ver cómo trabajo y después contame tu idea.',
-    cta: 'Ir al mapa de mundos',
+    title: { es: 'Tengo un proyecto', en: 'I have a project', it: 'Ho un progetto' },
+    sub: { es: 'Busco quién lo construya', en: 'Looking for someone to build it', it: 'Cerco chi lo costruisca' },
+    msg: {
+      es: 'Misión recomendada: jugá una o dos demos para ver cómo trabajo y después contame tu idea.',
+      en: 'Recommended mission: play a demo or two to see how I work, then tell me about your idea.',
+      it: 'Missione consigliata: gioca una o due demo per vedere come lavoro e poi raccontami la tua idea.',
+    },
+    cta: { es: 'Ir al mapa de mundos', en: 'Go to the world map', it: 'Vai alla mappa dei mondi' },
     act: () => scrollToId('mapa'),
   },
   {
     id: 'dev',
     icon: Code2,
-    title: 'Soy dev',
-    sub: 'Vengo por curiosidad técnica',
-    msg: 'Misión recomendada: entrá a Kontari y cifrá un secreto con PBKDF2 + AES-GCM reales, corriendo en tu navegador.',
-    cta: 'Entrar a Kontari',
+    title: { es: 'Soy dev', en: 'I’m a dev', it: 'Sono un dev' },
+    sub: { es: 'Vengo por curiosidad técnica', en: 'Here out of technical curiosity', it: 'Qui per curiosità tecnica' },
+    msg: {
+      es: 'Misión recomendada: entrá a Kontari y cifrá un secreto con PBKDF2 + AES-GCM reales, corriendo en tu navegador.',
+      en: 'Recommended mission: enter Kontari and encrypt a secret with real PBKDF2 + AES-GCM, running in your browser.',
+      it: 'Missione consigliata: entra in Kontari e cifra un segreto con PBKDF2 + AES-GCM veri, direttamente nel tuo browser.',
+    },
+    cta: { es: 'Entrar a Kontari', en: 'Enter Kontari', it: 'Entra in Kontari' },
     act: () => openLevel('kontari'),
   },
 ]
 
-const TIPS = ['Tip: probá Ctrl + K', 'Hay 7 estrellas escondidas', '¿Conocés el código Konami?', 'Mové el mouse, te sigo con la mirada']
+const TIPS: Loc<string[]> = {
+  es: ['Tip: probá Ctrl + K', 'Hay 7 estrellas escondidas', '¿Conocés el código Konami?', 'Mové el mouse, te sigo con la mirada'],
+  en: ['Tip: try Ctrl + K', 'There are 7 hidden stars', 'Know the Konami code?', 'Move your mouse, my eyes will follow'],
+  it: ['Tip: prova Ctrl + K', 'Ci sono 7 stelle nascoste', 'Conosci il codice Konami?', 'Muovi il mouse, ti seguo con lo sguardo'],
+}
 
 export function Hero() {
   const started = useGame((s) => s.started)
@@ -56,10 +73,12 @@ export function Hero() {
   const [roleIdx, setRoleIdx] = useState(0)
   const [tip, setTip] = useState(0)
   const active = PERSONAS.find((p) => p.id === persona)
+  const t = useT()
+  const tips = t.l(TIPS)
 
   useEffect(() => {
     const a = setInterval(() => setRoleIdx((i) => (i + 1) % profile.roles.length), 2600)
-    const b = setInterval(() => setTip((i) => (i + 1) % TIPS.length), 4200)
+    const b = setInterval(() => setTip((i) => (i + 1) % TIPS.es.length), 4200)
     return () => {
       clearInterval(a)
       clearInterval(b)
@@ -114,11 +133,11 @@ export function Hero() {
           </motion.div>
 
           <motion.p {...item(4)} className="mt-5 max-w-xl text-[17px] leading-relaxed text-white/65">
-            {profile.tagline}
+            {t.l(profile.tagline)}
           </motion.p>
 
           <motion.div {...item(5)} className="mt-9">
-            <p className="label mb-3">Elegí tu clase para personalizar la misión</p>
+            <p className="label mb-3">{t('Elegí tu clase para personalizar la misión', 'Choose your class to tailor the mission', 'Scegli la tua classe per personalizzare la missione')}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {PERSONAS.map((p) => {
                 const on = persona === p.id
@@ -134,8 +153,8 @@ export function Hero() {
                     className={`panel group relative overflow-hidden p-4 text-left transition ${on ? '!border-accent bg-accent/10 shadow-[0_0_0_4px_color-mix(in_oklab,var(--accent)_16%,transparent)]' : 'hover:!border-white/25 hover:-translate-y-0.5'}`}
                   >
                     <p.icon size={20} className={on ? 'text-accent' : 'text-white/60 transition group-hover:text-white'} />
-                    <p className="mt-3 font-display text-[13px] font-bold leading-tight">{p.title}</p>
-                    <p className="mt-1 text-xs text-white/50">{p.sub}</p>
+                    <p className="mt-3 font-display text-[13px] font-bold leading-tight">{t.l(p.title)}</p>
+                    <p className="mt-1 text-xs text-white/50">{t.l(p.sub)}</p>
                   </button>
                 )
               })}
@@ -145,14 +164,14 @@ export function Hero() {
               <AnimatePresence mode="wait">
                 {active ? (
                   <motion.div key={active.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                    <p className="max-w-md text-sm leading-relaxed text-white/75">{active.msg}</p>
+                    <p className="max-w-md text-sm leading-relaxed text-white/75">{t.l(active.msg)}</p>
                     <button className="btn btn-primary" onClick={() => { sfx.click(); active.act() }}>
-                      {active.cta} <ArrowRight size={15} />
+                      {t.l(active.cta)} <ArrowRight size={15} />
                     </button>
                   </motion.div>
                 ) : (
                   <motion.p key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-mono text-xs text-white/35">
-                    ↑ o explorá libremente: scrolleá o usá Ctrl + K
+                    {t('↑ o explorá libremente: scrolleá o usá Ctrl + K', '↑ or explore freely: scroll or use Ctrl + K', '↑ o esplora liberamente: scorri o usa Ctrl + K')}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -161,18 +180,18 @@ export function Hero() {
         </div>
 
         <motion.div {...item(3)} className="hidden lg:block">
-          <PlayerCard tip={TIPS[tip]} />
+          <PlayerCard tip={tips[tip]} />
         </motion.div>
       </div>
 
       <motion.div {...item(7)} className="relative mx-auto mt-14 grid w-full max-w-7xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-4">
         {[
-          { to: 3, s: '+', l: 'años construyendo software end-to-end' },
-          { to: 5, s: '', l: 'mundos para explorar' },
-          { to: 1300, s: '+', l: 'tests automatizados en Kontari' },
-          { to: 110, s: '', l: 'modelos de datos en un solo SaaS' },
+          { to: 3, s: '+', l: t('años construyendo software end-to-end', 'years building software end-to-end', 'anni a costruire software end-to-end') },
+          { to: 5, s: '', l: t('mundos para explorar', 'worlds to explore', 'mondi da esplorare') },
+          { to: 1300, s: '+', l: t('tests automatizados en Kontari', 'automated tests in Kontari', 'test automatizzati in Kontari') },
+          { to: 110, s: '', l: t('modelos de datos en un solo SaaS', 'data models in a single SaaS', 'modelli di dati in un solo SaaS') },
         ].map((x) => (
-          <div key={x.l} className="bg-[#080a12]/90 px-5 py-5">
+          <div key={x.to} className="bg-[#080a12]/90 px-5 py-5">
             <p className="font-display text-3xl font-black text-white">
               <Counter to={x.to} suffix={x.s} />
             </p>
@@ -181,7 +200,7 @@ export function Hero() {
         ))}
       </motion.div>
 
-      <button onClick={() => scrollToId('mapa')} className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-white/35 transition hover:text-accent sm:flex" aria-label="Bajar al mapa">
+      <button onClick={() => scrollToId('mapa')} className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-white/35 transition hover:text-accent sm:flex" aria-label={t('Bajar al mapa', 'Scroll down to the map', 'Scendi alla mappa')}>
         scroll
         <ChevronDown size={16} className="animate-bounce" />
       </button>
@@ -194,6 +213,7 @@ function PlayerCard({ tip }: { tip: string }) {
   const started = useGame((s) => s.started)
   const xp = useGame((s) => s.xp)
   const rank = rankFor(xp)
+  const t = useT()
 
   const move = (e: React.PointerEvent) => {
     const el = ref.current
@@ -218,7 +238,7 @@ function PlayerCard({ tip }: { tip: string }) {
   const stats = [
     { k: 'Front', v: 92 },
     { k: 'Back', v: 90 },
-    { k: 'Datos', v: 86 },
+    { k: t('Datos', 'Data', 'Dati'), v: 86 },
     { k: 'Tests', v: 84 },
     { k: 'UX', v: 88 },
   ]
@@ -235,7 +255,7 @@ function PlayerCard({ tip }: { tip: string }) {
           <div className="relative z-0">
             <div className="mb-4 flex items-center justify-between">
               <span className="label">Player card</span>
-              <span className="chip !border-amber/40 !text-amber">★ Legendaria</span>
+              <span className="chip !border-amber/40 !text-amber">★ {t('Legendaria', 'Legendary', 'Leggendaria')}</span>
             </div>
             <div className="grid-bg relative grid h-56 place-items-center overflow-hidden rounded-2xl bg-gradient-to-b from-accent/10 via-transparent to-accent-2/10">
               <div className="absolute h-40 w-40 rounded-full bg-accent/25 blur-3xl" />
@@ -270,8 +290,8 @@ function PlayerCard({ tip }: { tip: string }) {
 
             <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
               <div>
-                <p className="label">Rango</p>
-                <p className="font-display text-sm font-bold">{rank.name}</p>
+                <p className="label">{t('Rango', 'Rank', 'Grado')}</p>
+                <p className="font-display text-sm font-bold">{t.l(rank.name)}</p>
               </div>
               <div className="text-right">
                 <p className="label">XP</p>

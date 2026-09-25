@@ -4,6 +4,7 @@ import { Star } from 'lucide-react'
 import { fx } from '../../lib/fx'
 import { sfx } from '../../game/audio'
 import { game, toastStore, useGame } from '../../game/store'
+import { useT } from '../../lib/i18n'
 
 const GLYPHS = '01<>/_=+*#$%&?'
 
@@ -55,6 +56,7 @@ export function Counter({ to, suffix = '', duration = 1.6, className = '' }: { t
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' })
   const [v, setV] = useState(0)
+  const t = useT()
   useEffect(() => {
     if (!inView) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -66,7 +68,7 @@ export function Counter({ to, suffix = '', duration = 1.6, className = '' }: { t
   }, [inView, to, duration])
   return (
     <span ref={ref} className={className}>
-      {to >= 1000 ? v : v.toLocaleString('es-AR')}
+      {to >= 1000 ? v : v.toLocaleString(t.locale)}
       {suffix}
     </span>
   )
@@ -77,8 +79,9 @@ export function Kbd({ children }: { children: ReactNode }) {
 }
 
 export function Stars({ n, max = 3, size = 14 }: { n: number; max?: number; size?: number }) {
+  const t = useT()
   return (
-    <span className="inline-flex gap-0.5" aria-label={`${n} de ${max} estrellas`}>
+    <span className="inline-flex gap-0.5" aria-label={t(`${n} de ${max} estrellas`, `${n} of ${max} stars`, `${n} di ${max} stelle`)}>
       {Array.from({ length: max }, (_, i) => (
         <Star
           key={i}
@@ -94,6 +97,7 @@ export function Stars({ n, max = 3, size = 14 }: { n: number; max?: number; size
 export function Relic({ id, className = '', size = 22 }: { id: string; className?: string; size?: number }) {
   const got = useGame((s) => s.coins.includes(id))
   const started = useGame((s) => s.started)
+  const t = useT()
   if (got || !started) return null
   const grab = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -105,13 +109,17 @@ export function Relic({ id, className = '', size = 22 }: { id: string; className
     fx.burst(x, y, { colors: ['#ffb547', '#ffe08a', '#fff'], count: 22, speed: 260, shape: 'star' })
     fx.floatText(x, y - 12, '+25 XP', '#ffb547')
     const found = game.get().coins.length
-    toastStore.push({ kind: 'info', title: 'Estrella encontrada', text: `Llevás ${found} de 7. ${found >= 7 ? '¡Las tenés todas!' : 'Seguí buscando.'}` })
+    toastStore.push({
+      kind: 'info',
+      title: t('Estrella encontrada', 'Star found', 'Stella trovata'),
+      text: t(`Llevás ${found} de 7. ${found >= 7 ? '¡Las tenés todas!' : 'Seguí buscando.'}`, `${found} of 7 found. ${found >= 7 ? 'You got them all!' : 'Keep looking.'}`, `${found} su 7 trovate. ${found >= 7 ? 'Le hai prese tutte!' : 'Continua a cercare.'}`),
+    })
   }
   return (
     <button
       onClick={grab}
-      aria-label="Estrella escondida"
-      title="…¿qué es eso?"
+      aria-label={t('Estrella escondida', 'Hidden star', 'Stella nascosta')}
+      title={t('…¿qué es eso?', '…what’s that?', '…cos’è quello?')}
       className={`absolute z-20 grid place-items-center rounded-full opacity-60 transition hover:opacity-100 hover:scale-125 ${className}`}
       style={{ width: size + 14, height: size + 14 }}
     >

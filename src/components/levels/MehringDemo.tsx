@@ -3,23 +3,24 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { game } from '../../game/store'
 import { sfx } from '../../game/audio'
 import { fx } from '../../lib/fx'
+import { useT, type Loc } from '../../lib/i18n'
 
 const FINISHES = [
-  { k: 'arena', name: 'Arena', c: '#cdbb8c' },
-  { k: 'roble', name: 'Roble', c: '#a68e4f' },
-  { k: 'musgo', name: 'Musgo', c: '#61532e' },
-  { k: 'arcilla', name: 'Arcilla', c: '#7a2a20' },
-  { k: 'corteza', name: 'Corteza', c: '#431708' },
+  { k: 'arena', name: { es: 'Arena', en: 'Sand', it: 'Sabbia' }, c: '#cdbb8c' },
+  { k: 'roble', name: { es: 'Roble', en: 'Oak', it: 'Rovere' }, c: '#a68e4f' },
+  { k: 'musgo', name: { es: 'Musgo', en: 'Moss', it: 'Muschio' }, c: '#61532e' },
+  { k: 'arcilla', name: { es: 'Arcilla', en: 'Clay', it: 'Argilla' }, c: '#7a2a20' },
+  { k: 'corteza', name: { es: 'Corteza', en: 'Bark', it: 'Corteccia' }, c: '#431708' },
 ] as const
 const BACKS = [
-  { k: 'barrotes', name: 'Barrotes' },
-  { k: 'listones', name: 'Listones' },
-  { k: 'panel', name: 'Panel' },
+  { k: 'barrotes', name: { es: 'Barrotes', en: 'Spindles', it: 'Colonnine' } },
+  { k: 'listones', name: { es: 'Listones', en: 'Slats', it: 'Stecche' } },
+  { k: 'panel', name: { es: 'Panel', en: 'Panel', it: 'Pannello' } },
 ] as const
 const SEATS = [
-  { k: 'madera', name: 'Madera' },
-  { k: 'paja', name: 'Paja' },
-  { k: 'tapizado', name: 'Tapizado' },
+  { k: 'madera', name: { es: 'Madera', en: 'Wood', it: 'Legno' } },
+  { k: 'paja', name: { es: 'Paja', en: 'Rush', it: 'Paglia' } },
+  { k: 'tapizado', name: { es: 'Tapizado', en: 'Upholstered', it: 'Imbottita' } },
 ] as const
 
 const CATALOG = [
@@ -46,7 +47,16 @@ function shade(hex: string, amt: number) {
   return `rgb(${ch.join(',')})`
 }
 
-function Chair({ c, back, seat, ex }: { c: string; back: Back; seat: Seat; ex: number }) {
+const PARTS: [Loc, number, number][] = [
+  [{ es: 'Travesaño', en: 'Crest rail', it: 'Traversa superiore' }, 296, -30],
+  [{ es: 'Respaldo', en: 'Backrest', it: 'Schienale' }, 296, 40],
+  [{ es: 'Asiento', en: 'Seat', it: 'Seduta' }, 300, 246],
+  [{ es: 'Travesaño inf.', en: 'Stretcher', it: 'Traversa inf.' }, -38, 452],
+  [{ es: 'Patas', en: 'Legs', it: 'Gambe' }, 332, 480],
+]
+
+function Chair({ c, back, seat, ex, label }: { c: string; back: Back; seat: Seat; ex: number; label: string }) {
+  const t = useT()
   const labelOp = Math.max(0, Math.min(1, (ex - 0.55) / 0.3))
   const fabric = shade(c, -0.45)
   const T = (x: number, y: number) => `translate(${(x * ex).toFixed(2)} ${(y * ex).toFixed(2)})`
@@ -55,7 +65,7 @@ function Chair({ c, back, seat, ex }: { c: string; back: Back; seat: Seat; ex: n
   const grain = 'url(#mh-grain)'
 
   return (
-    <svg viewBox="-40 -100 400 610" className="h-full w-full" role="img" aria-label={`Silla ${c} en vista explosionada al ${Math.round(ex * 100)}%`}>
+    <svg viewBox="-40 -100 400 610" className="h-full w-full" role="img" aria-label={t(`${label} en vista explosionada al ${Math.round(ex * 100)}%`, `${label}, exploded view at ${Math.round(ex * 100)}%`, `${label}, vista esplosa al ${Math.round(ex * 100)}%`)}>
       <defs>
         <linearGradient id="mh-wg" x1="0" x2="1" y1="0" y2="0">
           <stop offset="0" stopColor={shade(c, -0.18)} />
@@ -186,15 +196,9 @@ function Chair({ c, back, seat, ex }: { c: string; back: Back; seat: Seat; ex: n
 
       {/* etiquetas de la vista explosionada */}
       <g opacity={labelOp} fontFamily="var(--font-mono)" fontSize="11" fill="#3b2b20">
-        {[
-          ['Travesaño', 296, -30],
-          ['Respaldo', 296, 40],
-          ['Asiento', 300, 246],
-          ['Travesaño inf.', -38, 452],
-          ['Patas', 332, 480],
-        ].map(([t, x, y]) => (
-          <text key={String(t)} x={Number(x)} y={Number(y)}>
-            {t}
+        {PARTS.map(([name, x, y]) => (
+          <text key={name.es} x={x} y={y}>
+            {t.l(name)}
           </text>
         ))}
       </g>
@@ -214,6 +218,7 @@ export function MehringDemo() {
   const drag = useRef<{ x: number; left: number; id: number } | null>(null)
   const [dragging, setDragging] = useState(false)
   const fin = FINISHES.find((f) => f.k === finish)!
+  const t = useT()
 
   // Sin shift: la rueda del mouse (vertical) también desliza el carril del catálogo.
   useEffect(() => {
@@ -274,7 +279,8 @@ export function MehringDemo() {
     check(next[0], next[1], next[2], ex)
   }
 
-  const name = `Silla ${fin.name} · ${BACKS.find((b) => b.k === back)!.name} · ${SEATS.find((s) => s.k === seat)!.name}`
+  const parts = `${t.l(BACKS.find((b) => b.k === back)!.name)} · ${t.l(SEATS.find((s) => s.k === seat)!.name)}`
+  const name = t(`Silla ${t.l(fin.name)} · ${parts}`, `${t.l(fin.name)} chair · ${parts}`, `Sedia ${t.l(fin.name)} · ${parts}`)
   const done = combos.current.size
 
   return (
@@ -282,12 +288,12 @@ export function MehringDemo() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <div className="overflow-hidden rounded-3xl" style={{ background: 'radial-gradient(90% 70% at 50% 35%, #f6f0e0, #dcd1b4 75%)' }}>
           <div className="relative h-[420px] sm:h-[480px]">
-            <Chair c={fin.c} back={back} seat={seat} ex={ex} />
+            <Chair c={fin.c} back={back} seat={seat} ex={ex} label={name} />
             <div className="absolute left-4 top-4 rounded-full bg-[#2d0d0a]/90 px-3.5 py-1.5 font-mono text-[11px] text-[#f6f0e0]">{name}</div>
           </div>
           <div className="bg-[#2d0d0a] p-4 text-[#f6f0e0]">
             <div className="mb-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-wider">
-              <label htmlFor="explode">Vista explosionada</label>
+              <label htmlFor="explode">{t('Vista explosionada', 'Exploded view', 'Vista esplosa')}</label>
               <span className="text-[#e0a458]">{Math.round(ex * 100)}%</span>
             </div>
             <input
@@ -314,25 +320,25 @@ export function MehringDemo() {
 
         <div className="space-y-6">
           <div>
-            <p className="label mb-3">Terminación</p>
+            <p className="label mb-3">{t('Terminación', 'Finish', 'Finitura')}</p>
             <div className="flex flex-wrap gap-2.5">
               {FINISHES.map((f) => (
-                <button key={f.k} onClick={() => upd(setFinish, f.k, [f.k, back, seat])} aria-pressed={finish === f.k} aria-label={f.name} className={`group flex flex-col items-center gap-2 rounded-2xl border p-2.5 transition ${finish === f.k ? 'border-accent bg-accent/10' : 'border-white/10 hover:border-white/30'}`}>
+                <button key={f.k} onClick={() => upd(setFinish, f.k, [f.k, back, seat])} aria-pressed={finish === f.k} aria-label={t.l(f.name)} className={`group flex flex-col items-center gap-2 rounded-2xl border p-2.5 transition ${finish === f.k ? 'border-accent bg-accent/10' : 'border-white/10 hover:border-white/30'}`}>
                   <span className="h-10 w-10 rounded-full ring-2 ring-white/20 transition group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${shade(f.c, 0.2)}, ${f.c} 55%, ${shade(f.c, -0.3)})` }} />
-                  <span className="font-mono text-[10.5px] text-white/60">{f.name}</span>
+                  <span className="font-mono text-[10.5px] text-white/60">{t.l(f.name)}</span>
                 </button>
               ))}
             </div>
           </div>
-          <Segmented label="Respaldo" value={back} options={BACKS} onChange={(v) => upd(setBack, v, [finish, v, seat])} />
-          <Segmented label="Asiento" value={seat} options={SEATS} onChange={(v) => upd(setSeat, v, [finish, back, v])} />
+          <Segmented label={t('Respaldo', 'Backrest', 'Schienale')} value={back} options={BACKS} onChange={(v) => upd(setBack, v, [finish, v, seat])} />
+          <Segmented label={t('Asiento', 'Seat', 'Seduta')} value={seat} options={SEATS} onChange={(v) => upd(setSeat, v, [finish, back, v])} />
 
           <div className="rounded-2xl border border-white/[0.07] bg-black/30 p-4">
-            <p className="label !text-accent">Desafío</p>
-            <p className="mt-1 font-display text-base font-bold">Probá 4 combinaciones y explotá la silla al 100%</p>
+            <p className="label !text-accent">{t('Desafío', 'Challenge', 'Sfida')}</p>
+            <p className="mt-1 font-display text-base font-bold">{t('Probá 4 combinaciones y explotá la silla al 100%', 'Try 4 combinations and explode the chair to 100%', 'Prova 4 combinazioni ed esplodi la sedia al 100%')}</p>
             <div className="mt-3 flex items-center gap-3 font-mono text-xs text-white/55">
-              <span className={done >= 4 ? 'text-mint' : ''}>Combinaciones {Math.min(done, 4)}/4</span>
-              <span className={maxEx.current >= 0.95 ? 'text-mint' : ''}>Explosión {maxEx.current >= 0.95 ? '✓' : '—'}</span>
+              <span className={done >= 4 ? 'text-mint' : ''}>{t('Combinaciones', 'Combinations', 'Combinazioni')} {Math.min(done, 4)}/4</span>
+              <span className={maxEx.current >= 0.95 ? 'text-mint' : ''}>{t('Explosión', 'Explosion', 'Esplosione')} {maxEx.current >= 0.95 ? '✓' : '—'}</span>
             </div>
           </div>
         </div>
@@ -340,8 +346,8 @@ export function MehringDemo() {
 
       <div className="mt-10">
         <div className="mb-4 flex items-center justify-between">
-          <p className="label">Del catálogo real · fotografía de producto</p>
-          <p className="hidden font-mono text-[10.5px] text-white/35 sm:block">arrastrá, girá la rueda o usá las flechas</p>
+          <p className="label">{t('Del catálogo real · fotografía de producto', 'From the real catalog · product photography', 'Dal catalogo reale · fotografia di prodotto')}</p>
+          <p className="hidden font-mono text-[10.5px] text-white/35 sm:block">{t('arrastrá, girá la rueda o usá las flechas', 'drag, scroll the wheel or use the arrows', 'trascina, gira la rotella o usa le frecce')}</p>
         </div>
         <div className="relative">
           <div
@@ -364,14 +370,14 @@ export function MehringDemo() {
           {/* flechas: alternativa explícita al wheel/drag para mouse de escritorio */}
           <button
             onClick={() => nudge(-1)}
-            aria-label="Ver sillas anteriores"
+            aria-label={t('Ver sillas anteriores', 'Previous chairs', 'Sedie precedenti')}
             className="absolute left-0 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-[#0b0e18]/90 p-2.5 text-white/80 shadow-lg backdrop-blur transition hover:border-accent hover:text-accent sm:grid"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => nudge(1)}
-            aria-label="Ver más sillas"
+            aria-label={t('Ver más sillas', 'More chairs', 'Altre sedie')}
             className="absolute right-0 top-1/2 hidden translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-[#0b0e18]/90 p-2.5 text-white/80 shadow-lg backdrop-blur transition hover:border-accent hover:text-accent sm:grid"
           >
             <ChevronRight size={18} />
@@ -382,14 +388,15 @@ export function MehringDemo() {
   )
 }
 
-function Segmented<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: readonly { k: T; name: string }[]; onChange: (v: T) => void }) {
+function Segmented<K extends string>({ label, value, options, onChange }: { label: string; value: K; options: readonly { k: K; name: Loc }[]; onChange: (v: K) => void }) {
+  const t = useT()
   return (
     <div>
       <p className="label mb-3">{label}</p>
       <div className="inline-flex rounded-full border border-white/10 bg-black/30 p-1">
         {options.map((o) => (
           <button key={o.k} onClick={() => onChange(o.k)} aria-pressed={value === o.k} className={`rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-wider transition ${value === o.k ? 'bg-accent text-void' : 'text-white/60 hover:text-white'}`}>
-            {o.name}
+            {t.l(o.name)}
           </button>
         ))}
       </div>

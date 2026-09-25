@@ -1,5 +1,6 @@
-import { skills } from '../data/skills'
+import { skillName, skills } from '../data/skills'
 import { projects } from '../data/projects'
+import { useT } from '../lib/i18n'
 
 function Row({ items, reverse = false, outline = false }: { items: string[]; reverse?: boolean; outline?: boolean }) {
   const doubled = [...items, ...items]
@@ -16,10 +17,11 @@ function Row({ items, reverse = false, outline = false }: { items: string[]; rev
 }
 
 export function Ribbon() {
+  const t = useT()
   return (
     <div className="relative z-10 -rotate-[1.2deg] overflow-hidden border-y border-white/[0.08] bg-[#080a12]/85 py-2 backdrop-blur-sm [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]" aria-hidden="true">
-      <Row items={skills.slice(0, 14).map((s) => s.name)} />
-      <Row items={projects.map((p) => `Nivel ${p.n} · ${p.name}`)} reverse outline />
+      <Row items={skills.slice(0, 14).map((s) => skillName(s, t))} />
+      <Row items={projects.map((p) => `${t('Nivel', 'Level', 'Livello')} ${p.n} · ${p.name}`)} reverse outline />
     </div>
   )
 }

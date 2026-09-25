@@ -4,65 +4,103 @@ import { ArrowRight, Briefcase, Calculator, Check, Handshake, Headset, Laptop, M
 import { game } from '../../game/store'
 import { sfx } from '../../game/audio'
 import { fx } from '../../lib/fx'
+import { useT, type Loc } from '../../lib/i18n'
 
 // Misma curva de easing que usa toda la landing real.
 const EASE = [0.16, 1, 0.3, 1] as const
-const HEADLINE_1 = 'Soluciones Contables, Impositivas y'
-const HEADLINE_2 = 'Laborales Estratégicas'
+// El contenido replica el sitio real (en español); la versión en inglés es una traducción para la demo.
+const HEADLINE_1: Loc = { es: 'Soluciones Contables, Impositivas y', en: 'Strategic Accounting, Tax and', it: 'Soluzioni Contabili, Fiscali e' }
+const HEADLINE_2: Loc = { es: 'Laborales Estratégicas', en: 'Payroll Solutions', it: 'del Lavoro Strategiche' }
 const BLUE = '#3b76f6'
 const GREEN = '#14c087'
 
 interface Service {
-  title: string
+  title: Loc
   Icon: LucideIcon
-  items: string[]
+  items: Loc<string[]>
 }
 const SERVICES: Service[] = [
   {
-    title: 'Asesoría Impositiva',
+    title: { es: 'Asesoría Impositiva', en: 'Tax Advisory', it: 'Consulenza Fiscale' },
     Icon: Calculator,
-    items: ['Liquidación de Impuestos Anuales y Mensuales.', 'Ganancias y Bienes Personales.', 'IVA, Ingresos Brutos y Monotributo.', 'Monitoreo de normativas nacionales y provinciales.'],
+    items: {
+      es: ['Liquidación de Impuestos Anuales y Mensuales.', 'Ganancias y Bienes Personales.', 'IVA, Ingresos Brutos y Monotributo.', 'Monitoreo de normativas nacionales y provinciales.'],
+      en: ['Annual and monthly tax filings.', 'Income tax and personal assets tax.', 'VAT, gross receipts tax and Monotributo.', 'Monitoring of national and provincial regulations.'],
+      it: ['Liquidazione delle imposte annuali e mensili.', 'Imposta sul reddito e patrimoniale.', 'IVA, imposta sui ricavi lordi e Monotributo.', 'Monitoraggio delle normative nazionali e provinciali.'],
+    },
   },
   {
-    title: 'Asesoría Laboral',
+    title: { es: 'Asesoría Laboral', en: 'Payroll & Labor Advisory', it: 'Consulenza del Lavoro' },
     Icon: Users,
-    items: ['Liquidación de sueldos y jornales integrales.', 'Cargas Sociales y Declaraciones Juradas.', 'Seguimiento exhaustivo de paritarias de convenios.', 'Empleados de Comercio y Casas Particulares.'],
+    items: {
+      es: ['Liquidación de sueldos y jornales integrales.', 'Cargas Sociales y Declaraciones Juradas.', 'Seguimiento exhaustivo de paritarias de convenios.', 'Empleados de Comercio y Casas Particulares.'],
+      en: ['Full payroll and wage processing.', 'Social security contributions and sworn statements.', 'Close tracking of collective wage agreements.', 'Retail employees and domestic workers.'],
+      it: ['Elaborazione completa di stipendi e paghe.', 'Contributi previdenziali e dichiarazioni giurate.', 'Monitoraggio costante dei contratti collettivi.', 'Dipendenti del commercio e lavoratori domestici.'],
+    },
   },
   {
-    title: 'Sector Agropecuario',
+    title: { es: 'Sector Agropecuario', en: 'Agricultural Sector', it: 'Settore Agricolo' },
     Icon: Tractor,
-    items: ['Gestión contable y administrativa para el agro.', 'Control de Cartas de Porte y regímenes de información.', 'Seguimiento de mercados y evolución sectorial.', 'Clasificación y gestión de hacienda.'],
+    items: {
+      es: ['Gestión contable y administrativa para el agro.', 'Control de Cartas de Porte y regímenes de información.', 'Seguimiento de mercados y evolución sectorial.', 'Clasificación y gestión de hacienda.'],
+      en: ['Accounting and administrative management for agribusiness.', 'Control of grain waybills and reporting regimes.', 'Market and industry trend tracking.', 'Livestock classification and management.'],
+      it: ['Gestione contabile e amministrativa per l’agricoltura.', 'Controllo delle lettere di vettura e dei regimi informativi.', 'Monitoraggio dei mercati e dell’andamento del settore.', 'Classificazione e gestione del bestiame.'],
+    },
   },
   {
-    title: 'Gestión Societaria',
+    title: { es: 'Gestión Societaria', en: 'Corporate Services', it: 'Gestione Societaria' },
     Icon: Briefcase,
-    items: ['Constitución de Sociedades por Acciones Simplificadas (SAS).', 'Estructuración corporativa e inscripciones legales.', 'Asesoramiento a medida para nuevos emprendimientos.'],
+    items: {
+      es: ['Constitución de Sociedades por Acciones Simplificadas (SAS).', 'Estructuración corporativa e inscripciones legales.', 'Asesoramiento a medida para nuevos emprendimientos.'],
+      en: ['Incorporation of simplified stock companies (SAS).', 'Corporate structuring and legal registrations.', 'Tailored advice for new ventures.'],
+      it: ['Costituzione di Società per Azioni Semplificate (SAS).', 'Strutturazione societaria e iscrizioni legali.', 'Consulenza su misura per nuove imprese.'],
+    },
   },
   {
-    title: 'Soluciones Tecnológicas',
+    title: { es: 'Soluciones Tecnológicas', en: 'Tech Solutions', it: 'Soluzioni Tecnologiche' },
     Icon: Laptop,
-    items: ['Implementación y parametrización de Facturación Electrónica.', 'Adecuación digital para profesionales y comercios.'],
+    items: {
+      es: ['Implementación y parametrización de Facturación Electrónica.', 'Adecuación digital para profesionales y comercios.'],
+      en: ['E-invoicing implementation and setup.', 'Digital adaptation for professionals and businesses.'],
+      it: ['Implementazione e configurazione della fatturazione elettronica.', 'Adeguamento digitale per professionisti e negozi.'],
+    },
   },
 ]
 
 const MODES = [
   {
     id: 'remoto',
-    label: 'Servicio Remoto',
+    label: { es: 'Servicio Remoto', en: 'Remote Service', it: 'Servizio da Remoto' },
     Icon: Headset,
     color: BLUE,
-    title: 'Asesoría Digital',
-    text: 'Atención remota eficiente, fluida y con la máxima rapidez técnica, desde cualquier punto del país.',
-    bullets: ['Videollamadas y mensajería en tiempo real', 'Firma y gestión documental 100% digital', 'Seguimiento de trámites desde cualquier lugar'],
+    title: { es: 'Asesoría Digital', en: 'Digital Advisory', it: 'Consulenza Digitale' },
+    text: {
+      es: 'Atención remota eficiente, fluida y con la máxima rapidez técnica, desde cualquier punto del país.',
+      en: 'Efficient, seamless remote service with top technical speed, from anywhere in the country.',
+      it: 'Assistenza da remoto efficiente, fluida e con la massima rapidità tecnica, da qualsiasi punto del paese.',
+    },
+    bullets: {
+      es: ['Videollamadas y mensajería en tiempo real', 'Firma y gestión documental 100% digital', 'Seguimiento de trámites desde cualquier lugar'],
+      en: ['Video calls and real-time messaging', '100% digital signing and document management', 'Track your filings from anywhere'],
+      it: ['Videochiamate e messaggi in tempo reale', 'Firma e gestione documentale 100% digitale', 'Segui le pratiche da ovunque'],
+    },
   },
   {
     id: 'presencial',
-    label: 'Servicio Presencial',
+    label: { es: 'Servicio Presencial', en: 'In-Person Service', it: 'Servizio in Presenza' },
     Icon: Handshake,
     color: GREEN,
-    title: 'Atención en Oficina',
-    text: 'Reuniones personalizadas y de trato directo, en las oficinas de la ciudad de Santa Fe.',
-    bullets: ['Reuniones agendadas a tu medida', 'Trato cercano y de largo plazo'],
+    title: { es: 'Atención en Oficina', en: 'Office Appointments', it: 'Ricevimento in Ufficio' },
+    text: {
+      es: 'Reuniones personalizadas y de trato directo, en las oficinas de la ciudad de Santa Fe.',
+      en: 'Personalized, face-to-face meetings at our offices in the city of Santa Fe.',
+      it: 'Incontri personalizzati e di persona, negli uffici della città di Santa Fe.',
+    },
+    bullets: {
+      es: ['Reuniones agendadas a tu medida', 'Trato cercano y de largo plazo'],
+      en: ['Meetings scheduled around you', 'A close, long-term relationship'],
+      it: ['Incontri fissati su misura per te', 'Un rapporto vicino e di lungo periodo'],
+    },
   },
 ]
 
@@ -74,11 +112,12 @@ export function SbDemo() {
   const [clicked, setClicked] = useState(false)
   const [opened, setOpened] = useState<Set<number>>(new Set())
   const doneRef = useRef(false)
+  const t = useT()
 
   const goals = [
-    { ok: replayed, label: 'Reproducí la animación del titular' },
-    { ok: clicked, label: 'Tocá el botón magnético' },
-    { ok: opened.size >= SERVICES.length, label: `Abrí las 5 áreas de servicio (${opened.size}/5)` },
+    { ok: replayed, label: t('Reproducí la animación del titular', 'Replay the headline animation', 'Riproduci l’animazione del titolo') },
+    { ok: clicked, label: t('Tocá el botón magnético', 'Click the magnetic button', 'Tocca il bottone magnetico') },
+    { ok: opened.size >= SERVICES.length, label: t(`Abrí las 5 áreas de servicio (${opened.size}/5)`, `Open all 5 service areas (${opened.size}/5)`, `Apri tutte e 5 le aree di servizio (${opened.size}/5)`) },
   ]
 
   useEffect(() => {
@@ -101,7 +140,7 @@ export function SbDemo() {
           {(
             [
               ['motion', 'Motion lab'],
-              ['servicios', 'Servicios y modalidad'],
+              ['servicios', t('Servicios y modalidad', 'Services and modes', 'Servizi e modalità')],
             ] as const
           ).map(([k, label]) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTabSafe(k)} className={`rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-wider transition ${tab === k ? 'bg-accent text-void' : 'text-white/60 hover:text-white'}`}>
@@ -110,8 +149,8 @@ export function SbDemo() {
           ))}
         </div>
         <ul className="flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[11px]">
-          {goals.map((g) => (
-            <li key={g.label} className={`flex items-center gap-1.5 ${g.ok ? 'text-mint' : 'text-white/40'}`}>
+          {goals.map((g, i) => (
+            <li key={i} className={`flex items-center gap-1.5 ${g.ok ? 'text-mint' : 'text-white/40'}`}>
               <span className={`grid h-4 w-4 place-items-center rounded-full ${g.ok ? 'bg-mint text-void' : 'border border-white/25'}`}>{g.ok && <Check size={10} strokeWidth={4} />}</span>
               {g.label}
             </li>
@@ -179,6 +218,7 @@ function MotionLab({ onReplay, onCta }: { onReplay: () => void; onCta: () => voi
   const [duration, setDuration] = useState(0.7)
   const [orbs, setOrbs] = useState(60)
   const [chat, setChat] = useState(false)
+  const t = useT()
 
   const replay = () => {
     sfx.pop()
@@ -197,14 +237,18 @@ function MotionLab({ onReplay, onCta }: { onReplay: () => void; onCta: () => voi
         <div className="relative z-10">
           <span className="mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ borderColor: `${GREEN}55`, background: `${GREEN}18`, color: GREEN }}>
             <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: GREEN }} />
-            Santa Fe &amp; Región
+            {t('Santa Fe & Región', 'Santa Fe & Region', 'Santa Fe e Regione')}
           </span>
           <h3 className="mx-auto mb-5 max-w-xl font-sans text-3xl font-extrabold leading-[1.1] tracking-tight text-slate-100 sm:text-[2.6rem]">
-            <AnimatedWords text={HEADLINE_1} stagger={stagger} duration={duration} run={run} />{' '}
-            <AnimatedWords text={HEADLINE_2} stagger={stagger} duration={duration} run={run} className="bg-gradient-to-r from-[#3b76f6] to-[#14c087] bg-clip-text text-transparent" />
+            <AnimatedWords text={t.l(HEADLINE_1)} stagger={stagger} duration={duration} run={run} />{' '}
+            <AnimatedWords text={t.l(HEADLINE_2)} stagger={stagger} duration={duration} run={run} className="bg-gradient-to-r from-[#3b76f6] to-[#14c087] bg-clip-text text-transparent" />
           </h3>
           <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-slate-400">
-            Soluciones integrales para empresas, productores agropecuarios, instituciones y profesionales, con foco en la sinceridad, el compromiso y la eficiencia.
+            {t(
+              'Soluciones integrales para empresas, productores agropecuarios, instituciones y profesionales, con foco en la sinceridad, el compromiso y la eficiencia.',
+              'Comprehensive solutions for businesses, farmers, institutions and professionals, focused on honesty, commitment and efficiency.',
+              'Soluzioni integrate per aziende, produttori agricoli, istituzioni e professionisti, con attenzione a sincerità, impegno ed efficienza.',
+            )}
           </p>
           <Magnetic>
             <button
@@ -219,20 +263,20 @@ function MotionLab({ onReplay, onCta }: { onReplay: () => void; onCta: () => voi
               className="group inline-flex items-center gap-2.5 rounded-xl px-8 py-3.5 text-base font-bold text-white transition-shadow"
               style={{ background: `linear-gradient(135deg, ${BLUE}, ${GREEN})`, boxShadow: `0 10px 30px ${BLUE}55` }}
             >
-              Consultar Ahora
+              {t('Consultar Ahora', 'Ask Now', 'Chiedi Ora')}
               <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
             </button>
           </Magnetic>
-          <p className="mt-3 font-mono text-[10.5px] text-slate-500">acercá el mouse: el botón te sigue</p>
+          <p className="mt-3 font-mono text-[10.5px] text-slate-500">{t('acercá el mouse: el botón te sigue', 'move your mouse closer: the button follows you', 'avvicina il mouse: il bottone ti segue')}</p>
 
           <AnimatePresence>
             {chat && (
               <motion.div initial={{ opacity: 0, y: 12, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} className="mx-auto mt-6 max-w-sm rounded-2xl border border-white/10 bg-[#0c1220] p-4 text-left">
                 <p className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-slate-500">
-                  <MessageCircle size={12} style={{ color: GREEN }} /> En el sitio real abre WhatsApp con este mensaje
+                  <MessageCircle size={12} style={{ color: GREEN }} /> {t('En el sitio real abre WhatsApp con este mensaje', 'On the real site this opens WhatsApp with this message', 'Sul sito reale apre WhatsApp con questo messaggio')}
                 </p>
                 <p className="w-fit max-w-full rounded-xl rounded-tl-sm px-3 py-2 text-[13px] text-white" style={{ background: '#0b5d45' }}>
-                  Hola SB Estudio Contable, quiero consultar sobre sus servicios.
+                  {t('Hola SB Estudio Contable, quiero consultar sobre sus servicios.', 'Hi SB Estudio Contable, I’d like to ask about your services.', 'Ciao SB Estudio Contable, vorrei informazioni sui vostri servizi.')}
                 </p>
               </motion.div>
             )}
@@ -242,25 +286,34 @@ function MotionLab({ onReplay, onCta }: { onReplay: () => void; onCta: () => voi
 
       <div className="space-y-6">
         <button onClick={replay} className="btn btn-primary w-full !py-4">
-          <RotateCcw size={15} /> Reproducir animación
+          <RotateCcw size={15} /> {t('Reproducir animación', 'Replay animation', 'Riproduci animazione')}
         </button>
-        <Range label="Escalonado entre palabras" value={stagger} min={0.02} max={0.2} step={0.01} unit="s" onChange={setStagger} />
-        <Range label="Duración de cada palabra" value={duration} min={0.3} max={1.4} step={0.05} unit="s" onChange={setDuration} />
-        <Range label="Intensidad de los orbes" value={orbs} min={10} max={100} step={1} unit="%" onChange={setOrbs} />
+        <Range id="sb-stagger" label={t('Escalonado entre palabras', 'Stagger between words', 'Sfalsamento tra le parole')} value={stagger} min={0.02} max={0.2} step={0.01} unit="s" onChange={setStagger} />
+        <Range id="sb-duration" label={t('Duración de cada palabra', 'Duration of each word', 'Durata di ogni parola')} value={duration} min={0.3} max={1.4} step={0.05} unit="s" onChange={setDuration} />
+        <Range id="sb-orbs" label={t('Intensidad de los orbes', 'Orb intensity', 'Intensità delle sfere')} value={orbs} min={10} max={100} step={1} unit="%" onChange={setOrbs} />
         <div className="rounded-2xl border border-white/[0.07] bg-black/30 p-4 font-mono text-[11.5px] leading-relaxed text-white/55">
-          <p className="label mb-2 !text-accent">Así está hecho</p>
-          <p>
-            cada palabra sube desde una máscara <span className="text-white/80">overflow-hidden</span>; la curva es{' '}
-            <span className="text-white/80">[{EASE.join(', ')}]</span> y se comparte en todo el sitio.
-          </p>
+          <p className="label mb-2 !text-accent">{t('Así está hecho', 'How it’s built', 'Com’è fatto')}</p>
+          {t(
+            <p>
+              cada palabra sube desde una máscara <span className="text-white/80">overflow-hidden</span>; la curva es{' '}
+              <span className="text-white/80">[{EASE.join(', ')}]</span> y se comparte en todo el sitio.
+            </p>,
+            <p>
+              each word rises from an <span className="text-white/80">overflow-hidden</span> mask; the curve is{' '}
+              <span className="text-white/80">[{EASE.join(', ')}]</span> and it’s shared across the whole site.
+            </p>,
+            <p>
+              ogni parola sale da una maschera <span className="text-white/80">overflow-hidden</span>; la curva è{' '}
+              <span className="text-white/80">[{EASE.join(', ')}]</span> ed è condivisa in tutto il sito.
+            </p>,
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-function Range({ label, value, min, max, step, unit, onChange }: { label: string; value: number; min: number; max: number; step: number; unit: string; onChange: (v: number) => void }) {
-  const id = `sb-${label.replace(/\s/g, '-')}`
+function Range({ id, label, value, min, max, step, unit, onChange }: { id: string; label: string; value: number; min: number; max: number; step: number; unit: string; onChange: (v: number) => void }) {
   return (
     <div>
       <div className="mb-2.5 flex items-baseline justify-between">
@@ -277,6 +330,7 @@ function Servicios({ opened, onOpen }: { opened: Set<number>; onOpen: (i: number
   const [mode, setMode] = useState(0)
   const m = MODES[mode]
   const svc = sel !== null ? SERVICES[sel] : null
+  const t = useT()
 
   return (
     <div className="space-y-8">
@@ -285,7 +339,7 @@ function Servicios({ opened, onOpen }: { opened: Set<number>; onOpen: (i: number
           {SERVICES.map((s, i) => {
             const seen = opened.has(i)
             return (
-              <li key={s.title}>
+              <li key={s.title.es}>
                 <button
                   onClick={() => {
                     sfx.click()
@@ -298,7 +352,7 @@ function Servicios({ opened, onOpen }: { opened: Set<number>; onOpen: (i: number
                   <span className="mb-3 grid h-10 w-10 place-items-center rounded-xl" style={{ background: `${i % 2 ? GREEN : BLUE}22`, color: i % 2 ? GREEN : BLUE }}>
                     <s.Icon size={20} />
                   </span>
-                  <span className="block font-display text-[13px] font-bold leading-tight">{s.title}</span>
+                  <span className="block font-display text-[13px] font-bold leading-tight">{t.l(s.title)}</span>
                   {seen && <span className="absolute right-3 top-3 grid h-5 w-5 place-items-center rounded-full bg-mint text-void"><Check size={11} strokeWidth={4} /></span>}
                 </button>
               </li>
@@ -309,11 +363,11 @@ function Servicios({ opened, onOpen }: { opened: Set<number>; onOpen: (i: number
         <div className="min-h-[240px] rounded-2xl border border-white/[0.08] bg-black/30 p-6">
           <AnimatePresence mode="wait">
             {svc ? (
-              <motion.div key={svc.title} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <p className="label !text-accent">Lo que hacemos</p>
-                <h4 className="mt-1 mb-5 flex items-center gap-3 font-display text-xl font-bold"><svc.Icon size={22} className="text-accent" /> {svc.title}</h4>
+              <motion.div key={svc.title.es} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <p className="label !text-accent">{t('Lo que hacemos', 'What we do', 'Cosa facciamo')}</p>
+                <h4 className="mt-1 mb-5 flex items-center gap-3 font-display text-xl font-bold"><svc.Icon size={22} className="text-accent" /> {t.l(svc.title)}</h4>
                 <ul className="space-y-3">
-                  {svc.items.map((it, i) => (
+                  {t.l(svc.items).map((it, i) => (
                     <motion.li key={it} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, ease: EASE, delay: 0.08 * i }} className="flex items-start gap-3 text-[14.5px] text-white/75">
                       <Check size={16} className="mt-0.5 shrink-0 text-mint" />
                       {it}
@@ -322,28 +376,28 @@ function Servicios({ opened, onOpen }: { opened: Set<number>; onOpen: (i: number
                 </ul>
               </motion.div>
             ) : (
-              <p className="grid h-full min-h-[200px] place-items-center text-center text-sm text-white/35">Elegí un área para ver su detalle, igual que en la sección Servicios.</p>
+              <p className="grid h-full min-h-[200px] place-items-center text-center text-sm text-white/35">{t('Elegí un área para ver su detalle, igual que en la sección Servicios.', 'Pick an area to see its details, just like in the Services section.', 'Scegli un’area per vederne i dettagli, come nella sezione Servizi.')}</p>
             )}
           </AnimatePresence>
         </div>
       </div>
 
       <div>
-        <p className="label mb-4">Modalidad de atención adaptable</p>
+        <p className="label mb-4">{t('Modalidad de atención adaptable', 'Flexible service modes', 'Modalità di assistenza flessibile')}</p>
         <div className="mb-5 inline-flex rounded-full border border-white/10 bg-black/30 p-1.5">
           {MODES.map((x, i) => (
             <button key={x.id} onClick={() => { sfx.pop(); setMode(i) }} aria-pressed={mode === i} className={`relative rounded-full px-5 py-2.5 text-[12px] font-bold transition-colors ${mode === i ? 'text-white' : 'text-white/50 hover:text-white/80'}`}>
               {mode === i && <motion.span layoutId="sb-mode" transition={{ type: 'spring', stiffness: 380, damping: 32 }} className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(135deg, ${x.color}, ${x.color}bb)` }} />}
-              <span className="relative z-10 flex items-center gap-2"><x.Icon size={15} /> {x.label}</span>
+              <span className="relative z-10 flex items-center gap-2"><x.Icon size={15} /> {t.l(x.label)}</span>
             </button>
           ))}
         </div>
         <AnimatePresence mode="wait">
           <motion.div key={m.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }} className="rounded-2xl border border-white/[0.08] bg-black/30 p-6">
-            <h4 className="font-display text-lg font-bold" style={{ color: m.color }}>{m.title}</h4>
-            <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-white/65">{m.text}</p>
+            <h4 className="font-display text-lg font-bold" style={{ color: m.color }}>{t.l(m.title)}</h4>
+            <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-white/65">{t.l(m.text)}</p>
             <ul className="mt-4 grid gap-2 sm:grid-cols-3">
-              {m.bullets.map((b) => (
+              {t.l(m.bullets).map((b) => (
                 <li key={b} className="flex items-start gap-2 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-[13px] text-white/70">
                   <Check size={14} className="mt-0.5 shrink-0" style={{ color: m.color }} />
                   {b}
