@@ -6,7 +6,7 @@ import { Relic, SectionTitle } from './ui/bits'
 
 const PRINCIPLES = [
   { icon: Layers, title: 'De la base de datos al píxel', text: 'Como único desarrollador de Kontari llevo el ciclo completo: modelo el dominio (110 modelos), diseño la interfaz, la conecto y la despliego.' },
-  { icon: ShieldCheck, title: 'Tests como seguro de vida', text: 'Más de 600 tests en Kontari (Vitest, Playwright y axe-core en CI), incluidos guards estáticos que rompen el build si una ruta queda sin autenticación.' },
+  { icon: ShieldCheck, title: 'Tests como seguro de vida', text: 'Más de 1300 tests en Kontari (Vitest, Playwright y axe-core en CI), incluidos guards estáticos que rompen el build si una ruta queda sin autenticación.' },
   { icon: Plug, title: 'Integraciones que funcionan', text: 'ARCA, Mercado Pago, Stripe, Adyen, WhatsApp e IA generativa. Cobros, webhooks y facturas que existen de verdad, no maquetas.' },
   { icon: Blocks, title: 'Arquitectura que aguanta', text: 'Clean Architecture con NestJS en Crombie, diseño modular y POO en ShineForth. Capas claras para que el código crezca sin dolor.' },
   { icon: Users, title: 'Lidero y mentoreo', text: 'Lideré proyectos full stack y mentoreé a un desarrollador junior en buenas prácticas, Git y APIs. Comunico bien con clientes y stakeholders.' },

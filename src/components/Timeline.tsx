@@ -28,8 +28,11 @@ export function Timeline() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.3 })
   const now = new Date()
-  const nowIdx = Math.min(END, Math.max(START, now.getFullYear() * 12 + now.getMonth()))
+  // "Hoy" con fracción del mes, para que la línea caiga en el día real y no al inicio del mes.
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+  const nowPos = Math.min(END + 1, Math.max(START, now.getFullYear() * 12 + now.getMonth() + (now.getDate() - 0.5) / daysInMonth))
   const total = END - START + 1
+  const pct = (m: number) => `${(m / total) * 100}%`
   const main = roles.filter((r) => r.kind === 'Fundador' || r.kind === 'Empleo')
   const side = roles.filter((r) => r.kind === 'Freelance' || r.kind === 'Proyecto propio')
 
@@ -121,12 +124,13 @@ export function Timeline() {
               {[2024, 2025, 2026].map((y) => (
                 <span key={y} className="pointer-events-none absolute inset-y-0 w-px bg-white/[0.06]" style={{ left: `${((y * 12 - START) / total) * 100}%` }} />
               ))}
-              <span className="pointer-events-none absolute inset-y-0 z-10 w-px bg-accent/70" style={{ left: `${((nowIdx - START) / total) * 100}%` }}>
-                <span className="absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] font-bold text-void">HOY</span>
+              <span className="pointer-events-none absolute -bottom-1 -top-1 w-0 border-l border-dashed border-accent/60" style={{ left: pct(nowPos - START) }}>
+                <span className="absolute -top-5 left-0 -translate-x-1/2 whitespace-nowrap rounded bg-accent px-1.5 py-0.5 font-mono text-[9px] font-bold text-void">HOY</span>
               </span>
               {[...roles].sort((a, b) => idx(a.from) - idx(b.from)).map((r, i) => {
                 const a = Math.max(0, idx(r.from) - START)
-                const b = Math.min(total, (r.to ? idx(r.to) : nowIdx) - START + 1)
+                // Vigentes: terminan en "hoy". El ancho mínimo crece hacia la izquierda para no pasarse de esa línea.
+                const b = Math.min(total, r.to ? idx(r.to) - START + 1 : nowPos - START)
                 return (
                   <div key={r.id} className="relative flex h-8 items-center">
                     <motion.button
@@ -137,7 +141,7 @@ export function Timeline() {
                       animate={inView ? { scaleX: 1 } : {}}
                       transition={{ duration: 0.9, delay: 0.12 * i, ease: [0.16, 1, 0.3, 1] }}
                       className="absolute flex h-8 origin-left items-center overflow-hidden rounded-full px-3 text-left font-mono text-[11px] font-bold text-void transition-[filter] hover:brightness-125"
-                      style={{ left: `${(a / total) * 100}%`, width: `${((b - a) / total) * 100}%`, background: r.color, opacity: hover && hover !== r.id ? 0.35 : 1, minWidth: 74 }}
+                      style={{ left: `min(${pct(a)}, calc(${pct(b)} - 74px))`, width: `max(${pct(b - a)}, 74px)`, background: r.color, opacity: hover && hover !== r.id ? 0.35 : 1 }}
                       aria-label={`${r.company}, ${span(r)}`}
                     >
                       <span className="truncate">{r.company}</span>

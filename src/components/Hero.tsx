@@ -169,7 +169,7 @@ export function Hero() {
         {[
           { to: 3, s: '+', l: 'años construyendo software end-to-end' },
           { to: 5, s: '', l: 'mundos para explorar' },
-          { to: 600, s: '+', l: 'tests automatizados en Kontari' },
+          { to: 1300, s: '+', l: 'tests automatizados en Kontari' },
           { to: 110, s: '', l: 'modelos de datos en un solo SaaS' },
         ].map((x) => (
           <div key={x.l} className="bg-[#080a12]/90 px-5 py-5">

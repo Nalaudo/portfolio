@@ -36,8 +36,8 @@ export const projects: Project[] = [
     accent: '#e0a458',
     accent2: '#c2410c',
     stats: [
-      { value: 0, label: 'libs de animación' },
-      { value: 0, label: 'requests a Google Fonts' },
+      { value: 100, suffix: '%', label: 'animación nativa, sin librerías' },
+      { value: 3, label: 'fuentes self-hosted, sin CDN' },
       { value: 25, label: 'fotos optimizadas en WebP' },
       { value: 1953, label: 'año de fundación' },
     ],
@@ -233,7 +233,7 @@ export const projects: Project[] = [
     stats: [
       { value: 110, label: 'modelos de datos' },
       { value: 3, label: 'apps · 1 base compartida' },
-      { value: 600, suffix: '+', label: 'tests automatizados' },
+      { value: 1300, suffix: '+', label: 'tests automatizados' },
       { value: 9, label: 'planes de suscripción' },
     ],
     stack: [
